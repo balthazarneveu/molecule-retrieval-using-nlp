@@ -9,6 +9,7 @@ from training_loop import training
 from evaluation import evaluation
 from utils import get_device
 from experiments import get_experience
+from metrics import plot_metrics
 
 
 def get_tokenizer(configuration):
@@ -44,6 +45,11 @@ def train_experience(exp: int, root_dir=ROOT_DIR, debug=False) -> None:
 def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:
     model, configuration, output_directory, tokenizer, device = prepare_experience(exp, root_dir=root_dir)
     evaluation(model, output_directory, configuration, tokenizer, device)
+
+
+def plot_metrics_experience(exp: int, root_dir=ROOT_DIR) -> None:
+    _model, configuration, output_directory, _tokenizer, _device = prepare_experience(exp, root_dir=root_dir)
+    plot_metrics_experience(output_directory, configuration)
 
 
 def parse_args():

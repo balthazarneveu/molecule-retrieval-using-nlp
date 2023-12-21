@@ -35,7 +35,7 @@ def training(
 
     epoch = 0
     loss = 0
-    losses = []
+    all_losses = []
     count_iter = 0
     time1 = time.time()
 
@@ -45,7 +45,7 @@ def training(
     for epoch in range(nb_epochs):
         print('-----EPOCH{}-----'.format(epoch+1))
         model.train()
-
+        losses = []
         for batch_idx, batch in enumerate(train_loader):
             if max_count is not None and batch_idx > max_count:
                 break
@@ -70,12 +70,13 @@ def training(
                 print("Iteration: {0}, Time: {1:.4f} s, training loss: {2:.4f}".format(count_iter,
                                                                                        time2 - time1, loss/print_freq))
                 losses.append(loss)
+                all_losses.append(loss)
                 loss = 0
         model.eval()
         val_loss = 0
         for batch_idx, batch in enumerate(val_loader):
-            if batch_idx > 5:
-                break
+            # if batch_idx > 20:
+            #     break
             input_ids = batch.input_ids
             batch.pop('input_ids')
             attention_mask = batch.attention_mask
@@ -91,10 +92,10 @@ def training(
               str(val_loss/len(val_loader)))
         metrics_dict = {
             'epoch': epoch,
-            'validation_accuracy': val_loss,
+            'validation_loss': val_loss,
             # 'optimizer_state_dict': optimizer.state_dict(),
             'configuration': configuration,
-            'loss': loss,
+            'training_loss': losses,
         }
         Dump.save_json(metrics_dict, output_directory/f'metrics__{epoch:04d}.json')
 
