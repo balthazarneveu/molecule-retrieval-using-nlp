@@ -1,6 +1,6 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, BETAS, OPTIMIZER,
-    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH
+    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, ROOT_DIR, DATA_DIR
 )
 import logging
 from data_dumps import Dump
@@ -19,8 +19,6 @@ import os
 import pandas as pd
 from pathlib import Path
 from typing import Tuple
-ROOT_DIR = Path(__file__).parent
-DATA_DIR = ROOT_DIR / '__data'
 
 
 def get_device():
@@ -44,7 +42,7 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
     if exp == 0:
         configuration[NAME] = 'check-pipeline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Check pipeline'
-        configuration[MAX_STEP_PER_EPOCH] = 100
+        configuration[MAX_STEP_PER_EPOCH] = 5
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=8, graph_hidden_channels=8)
     if exp == 1:
@@ -189,9 +187,6 @@ def training(model, output_directory, configuration, tokenizer, device):
 
 
 def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:
-    # model, configuration = get_experience(exp)
-    # output_directory = get_output_directory(configuration, root_dir=root_dir)
-    # tokenizer = get_tokenizer(configuration)
     model, configuration, output_directory, tokenizer, device = prepare_experience(exp, root_dir=root_dir)
     evaluation(model, output_directory, configuration, tokenizer, device)
 

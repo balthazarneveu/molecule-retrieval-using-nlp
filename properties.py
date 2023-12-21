@@ -1,3 +1,4 @@
+from pathlib import Path
 NB_EPOCHS = "nb_epochs"
 BATCH_SIZE = "batch_size"
 LEARNING_RATE = "lr"
@@ -11,3 +12,5 @@ TRAIN, VALIDATION, TEST = "train", "validation", "test"
 DEVICE = "device"
 ID = "id"
 MAX_STEP_PER_EPOCH = "max_step_per_epoch"
+ROOT_DIR = Path(__file__).parent
+DATA_DIR = ROOT_DIR / '__data'
