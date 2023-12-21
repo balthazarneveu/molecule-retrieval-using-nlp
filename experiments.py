@@ -32,12 +32,17 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
     if exp == 2:
+        configuration[NB_EPOCHS] = 5
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - 5 epochs'
+        model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+                      nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
+    if exp == 3:
         configuration[NB_EPOCHS] = 30
         configuration[NAME] = 'Baseline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers - 30 epochs'
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
-        configuration[MAX_STEP_PER_EPOCH] = 5
     configuration[ID] = exp
     configuration[BATCH_SIZE] = {
         TRAIN: configuration[BATCH_SIZE][0],

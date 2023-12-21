@@ -27,7 +27,7 @@ def plot_metrics(output_directories: Path, configuration_list: dict = None):
         name = ""
         for key in [ID, NAME, ANNOTATIONS]:
             name += f"{configuration[key]} "
-        plt.plot(epochs_step, train_losses, "-o", color=color, label=f"{name} train loss")
+        plt.plot(epochs_step, train_losses, "-.", alpha=0.5, color=color, label=f"{name} train loss")
         plt.plot(epochs[1:], val_losses, "-o", color=color, label=f"{name} valid loss")
     plt.legend()
     plt.grid()
