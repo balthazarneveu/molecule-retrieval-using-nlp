@@ -5,9 +5,10 @@ import numpy as np
 from utils import parse_args, get_output_directory_experiment
 from properties import ID, NAME, ANNOTATIONS
 
+
 def plot_metrics(output_directories: Path, configuration_list: dict = None):
     plt.figure(figsize=(12, 8))
-    colors =  ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     for exp_idx, output_directory in enumerate(output_directories):
         color = colors[exp_idx]
         dumps_list = sorted(list(output_directory.glob("*.json")))
@@ -17,7 +18,7 @@ def plot_metrics(output_directories: Path, configuration_list: dict = None):
 
         train_losses = np.array([d['training_loss'] for d in full_data])
         train_losses = train_losses.flatten()
-        epochs_step = np.arange(len(train_losses))*epochs[-1]/len(train_losses)
+        epochs_step = (1+np.arange(len(train_losses)))*epochs[-1]/(len(train_losses))
         val_losses = [d['validation_loss'] for d in full_data]
         if configuration_list is None:
             configuration = full_data[0]['configuration']
@@ -31,7 +32,6 @@ def plot_metrics(output_directories: Path, configuration_list: dict = None):
     plt.legend()
     plt.grid()
     plt.show()
-
 
 
 if __name__ == '__main__':
