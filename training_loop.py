@@ -13,6 +13,60 @@ import os
 from pathlib import Path
 from transformers import PreTrainedTokenizer
 from loss import contrastive_loss
+from tqdm import tqdm
+import logging
+
+
+def train(model, optimizer, count_iter, epoch, train_loader, max_count=None, print_freq=50, device='cuda'):
+    logging.info('-----EPOCH{}-----'.format(epoch+1))
+    model.train()
+    losses = []
+    time1 = time.time()
+    for batch_idx, batch in tqdm(enumerate(train_loader), total=len(train_loader), desc="Train"):
+        if max_count is not None and batch_idx > max_count:
+            break
+        input_ids = batch.input_ids
+        batch.pop('input_ids')
+        attention_mask = batch.attention_mask
+        batch.pop('attention_mask')
+        graph_batch = batch
+
+        x_graph, x_text = model(graph_batch.to(device),
+                                input_ids.to(device),
+                                attention_mask.to(device))
+        current_loss = contrastive_loss(x_graph, x_text)
+        optimizer.zero_grad()
+        current_loss.backward()
+        optimizer.step()
+        loss = current_loss.item()
+
+        count_iter += 1
+        if count_iter % print_freq == 0:
+            time2 = time.time()
+            logging.info("Iteration: {0}, Time: {1:.4f} s, training loss: {2:.4f}".format(count_iter,
+                                                                                          time2 - time1, loss/print_freq))
+        losses.append(loss)
+    return model, losses
+
+
+def eval(model, val_loader, device='cuda'):
+    model.eval()
+    val_loss = 0
+    for batch_idx, batch in tqdm(enumerate(val_loader), total=len(val_loader), desc="Validation"):
+        # if batch_idx < 300:
+        #     continue
+        input_ids = batch.input_ids
+        batch.pop('input_ids')
+        attention_mask = batch.attention_mask
+        batch.pop('attention_mask')
+        graph_batch = batch
+        x_graph, x_text = model(graph_batch.to(device),
+                                input_ids.to(device),
+                                attention_mask.to(device))
+        current_loss = contrastive_loss(x_graph, x_text)
+        val_loss += current_loss.item()
+
+    return val_loss/len(val_loader)
 
 
 def training(
@@ -37,68 +91,26 @@ def training(
     loss = 0
     all_losses = []
     count_iter = 0
-    time1 = time.time()
 
     best_validation_loss = 1000000
     max_count = configuration[MAX_STEP_PER_EPOCH]
 
     for epoch in range(nb_epochs):
-        print('-----EPOCH{}-----'.format(epoch+1))
-        model.train()
-        losses = []
-        for batch_idx, batch in enumerate(train_loader):
-            if max_count is not None and batch_idx > max_count:
-                break
-            input_ids = batch.input_ids
-            batch.pop('input_ids')
-            attention_mask = batch.attention_mask
-            batch.pop('attention_mask')
-            graph_batch = batch
-
-            x_graph, x_text = model(graph_batch.to(device),
-                                    input_ids.to(device),
-                                    attention_mask.to(device))
-            current_loss = contrastive_loss(x_graph, x_text)
-            optimizer.zero_grad()
-            current_loss.backward()
-            optimizer.step()
-            loss += current_loss.item()
-
-            count_iter += 1
-            if count_iter % print_freq == 0:
-                time2 = time.time()
-                print("Iteration: {0}, Time: {1:.4f} s, training loss: {2:.4f}".format(count_iter,
-                                                                                       time2 - time1, loss/print_freq))
-                losses.append(loss)
-                all_losses.append(loss)
-                loss = 0
-        model.eval()
-        val_loss = 0
-        for batch_idx, batch in enumerate(val_loader):
-            # if batch_idx > 20:
-            #     break
-            input_ids = batch.input_ids
-            batch.pop('input_ids')
-            attention_mask = batch.attention_mask
-            batch.pop('attention_mask')
-            graph_batch = batch
-            x_graph, x_text = model(graph_batch.to(device),
-                                    input_ids.to(device),
-                                    attention_mask.to(device))
-            current_loss = contrastive_loss(x_graph, x_text)
-            val_loss += current_loss.item()
+        torch.cuda.empty_cache()
+        model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
+                                    max_count=max_count, print_freq=print_freq, device=device)
+        all_losses.extend(epoch_losses)
+        val_loss = eval(model, val_loader, device=device)
         best_validation_loss = min(best_validation_loss, val_loss)
-        print('-----EPOCH'+str(epoch+1)+'----- done.  Validation loss: ',
-              str(val_loss/len(val_loader)))
+        print(f'-----EPOCH {epoch+1} ----- done.   Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e}')
         metrics_dict = {
             'epoch': epoch,
             'validation_loss': val_loss,
-            # 'optimizer_state_dict': optimizer.state_dict(),
             'configuration': configuration,
-            'training_loss': losses,
+            'training_loss': epoch_losses,
         }
+        
         Dump.save_json(metrics_dict, output_directory/f'metrics__{epoch:04d}.json')
-
         if best_validation_loss == val_loss:
             print('validation loss improved saving checkpoint...')
 
