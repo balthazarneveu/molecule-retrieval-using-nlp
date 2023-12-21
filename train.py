@@ -1,7 +1,8 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, BETAS, OPTIMIZER,
-    TRAIN, VALIDATION, TEST, ID
+    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH
 )
+import logging
 from data_dumps import Dump
 import argparse
 from sklearn.metrics.pairwise import cosine_similarity
@@ -29,7 +30,7 @@ def get_device():
 
 def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
     configuration = {
-        NB_EPOCHS: 2,
+        NB_EPOCHS: 5,
         # batch_size : 32
         BATCH_SIZE: (16, 8, 8),  # To fit Nvidia T500 4Gb RAM
         OPTIMIZER: {
@@ -37,13 +38,15 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
             WEIGHT_DECAY: 0.01,
             BETAS: (0.9, 0.999)
         },
-        TOKENIZER_NAME: 'distilbert-base-uncased'
+        TOKENIZER_NAME: 'distilbert-base-uncased',
+        MAX_STEP_PER_EPOCH: None
     }
     if exp == 0:
         configuration[NAME] = 'check-pipeline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Check pipeline'
+        configuration[MAX_STEP_PER_EPOCH] = 100
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
-                      nhid=8, graph_hidden_channels=8)  # nout = bert model hidden dim
+                      nhid=8, graph_hidden_channels=8)
     if exp == 1:
         configuration[NAME] = 'Baseline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers'
@@ -73,16 +76,28 @@ def get_tokenizer(configuration):
 
 def get_output_directory(configuration: dict, root_dir: Path = ROOT_DIR):
     output_directory = root_dir/'__output'/f"{configuration[ID]:04d}_{configuration[NAME]}"
-    output_directory.mkdir(exist_ok=True, parents=True)
     return output_directory
 
 
-def train_experience(exp: int, root_dir=ROOT_DIR) -> None:
+def prepare_experience(exp: int, root_dir=ROOT_DIR) -> dict:
     model, configuration = get_experience(exp)
     output_directory = get_output_directory(configuration, root_dir=root_dir)
     tokenizer = get_tokenizer(configuration)
-    gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
     device = get_device()
+    return model, configuration, output_directory, tokenizer, device
+
+
+def train_experience(exp: int, root_dir=ROOT_DIR) -> None:
+    model, configuration, output_directory, tokenizer, device = prepare_experience(exp, root_dir=root_dir)
+    if output_directory.exists():
+        logging.warning(f"Experience {exp} already trained")
+        return
+    output_directory.mkdir(exist_ok=True, parents=True)
+    training(model, output_directory, configuration, tokenizer, device)
+
+
+def training(model, output_directory, configuration, tokenizer, device):
+    gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
 
     nb_epochs = configuration[NB_EPOCHS]
     batch_size = configuration[BATCH_SIZE]
@@ -102,13 +117,14 @@ def train_experience(exp: int, root_dir=ROOT_DIR) -> None:
     printEvery = 50
     printEvery = 1
     best_validation_loss = 1000000
+    max_count = configuration[MAX_STEP_PER_EPOCH]
 
     for epoch in range(nb_epochs):
         print('-----EPOCH{}-----'.format(epoch+1))
         model.train()
-        max_count = 1
+
         for batch_idx, batch in enumerate(train_loader):
-            if batch_idx > max_count:
+            if max_count is not None and batch_idx > max_count:
                 break
             input_ids = batch.input_ids
             batch.pop('input_ids')
@@ -149,17 +165,17 @@ def train_experience(exp: int, root_dir=ROOT_DIR) -> None:
         print('-----EPOCH'+str(epoch+1)+'----- done.  Validation loss: ',
               str(val_loss/len(val_loader)))
         metrics_dict = {
-                'epoch': epoch,
-                'validation_accuracy': val_loss,
-                'optimizer_state_dict': optimizer.state_dict(),
-                'configuration': configuration,
-                'loss': loss,
+            'epoch': epoch,
+            'validation_accuracy': val_loss,
+            'optimizer_state_dict': optimizer.state_dict(),
+            'configuration': configuration,
+            'loss': loss,
         }
         Dump.save_json(metrics_dict, output_directory/'metrics__{epoch:04d}.json')
 
         if best_validation_loss == val_loss:
             print('validation loss improved saving checkpoint...')
-            
+
             save_path = os.path.join(output_directory, f'model_{epoch:04d}.pt')
             torch.save({
                 'epoch': epoch,
@@ -173,17 +189,19 @@ def train_experience(exp: int, root_dir=ROOT_DIR) -> None:
 
 
 def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:
-    model, configuration = get_experience(exp)
-    output_directory = get_output_directory(configuration, root_dir=root_dir)
-    tokenizer = get_tokenizer(configuration)
-    evaluation(model, output_directory, configuration, tokenizer)
+    # model, configuration = get_experience(exp)
+    # output_directory = get_output_directory(configuration, root_dir=root_dir)
+    # tokenizer = get_tokenizer(configuration)
+    model, configuration, output_directory, tokenizer, device = prepare_experience(exp, root_dir=root_dir)
+    evaluation(model, output_directory, configuration, tokenizer, device)
 
 
-def evaluation(model, model_path, configuration, tokenizer):
-    device = get_device()
+def evaluation(model, model_path, configuration, tokenizer, device):
     batch_size = configuration[BATCH_SIZE][TEST]
     print('loading best model...')
-    best_model_path = sorted(list(model_path.glob("*.pt")))[-1]
+    best_model_path = sorted(list(model_path.glob("*.pt")))
+    assert len(best_model_path) > 0, "No model checkpoint found at {model_path}"
+    best_model_path = best_model_path[-1]
     checkpoint = torch.load(best_model_path)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
