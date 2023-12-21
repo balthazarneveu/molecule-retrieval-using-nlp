@@ -14,3 +14,5 @@ ID = "id"
 MAX_STEP_PER_EPOCH = "max_step_per_epoch"
 ROOT_DIR = Path(__file__).parent
 DATA_DIR = ROOT_DIR / '__data'
+OUT_DIR = ROOT_DIR/'__output'
+OUT_DIR.mkdir(exist_ok=True, parents=True)
