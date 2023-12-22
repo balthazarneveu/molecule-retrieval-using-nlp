@@ -44,7 +44,9 @@ def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:
 
 
 if __name__ == '__main__':
-    args = get_default_parser().parse_args
+    parser = get_default_parser()
+    parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
+    args = parser.parse_args()
     for exp in args.exp_list:
-        train_experience(exp, debug=args.debug)
+        train_experience(exp, debug=args.debug, backup_root=args.backup_root)
         evaluate_experience(exp)
