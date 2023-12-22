@@ -12,6 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from torch.utils.data import DataLoader as TorchDataLoader
 import pandas as pd
 from utils import get_default_parser, prepare_experience
+from platform_description import get_git_sha1
 from tqdm import tqdm
 import logging
 
@@ -97,7 +98,7 @@ def evaluate_experience(
         model, output_directory, configuration, tokenizer, device, backup_folder=backup_folder,
         override=override
     )
-    sha1 = "<sha1>"
+    sha1 = get_git_sha1()
     message = f"exp_{exp} sha1: {sha1} config: {configuration}"
     print(f'kaggle competitions submit -c altegrad-2023-data-challenge -f {submission_csv_file} -m "{message}"')
 

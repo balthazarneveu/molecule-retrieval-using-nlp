@@ -1,11 +1,11 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, BETAS, OPTIMIZER,
-    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, PLATFORM, MODEL_SIZE
+    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, PLATFORM, MODEL_SIZE, SHA1
 )
 import torch
 from model import Model
 from typing import Tuple
-from platform_description import get_hardware_descriptor
+from platform_description import get_hardware_descriptor, get_git_sha1
 
 
 def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
@@ -60,6 +60,7 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
         VALIDATION: configuration[BATCH_SIZE][1],
         TEST: configuration[BATCH_SIZE][2]
     }
+    configuration[SHA1] = get_git_sha1()
     return model, configuration
 
 

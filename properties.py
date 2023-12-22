@@ -14,6 +14,7 @@ DEVICE = "device"
 ID = "id"
 PLATFORM = "platform"
 MAX_STEP_PER_EPOCH = "max_step_per_epoch"
+SHA1 = "sha1"
 ROOT_DIR = Path(__file__).parent
 DATA_DIR = ROOT_DIR / '__data'
 OUT_DIR = ROOT_DIR/'__output'

@@ -12,12 +12,19 @@ import time
 import os
 from pathlib import Path
 from transformers import PreTrainedTokenizer
+from torch.utils.tensorboard import SummaryWriter
 from loss import contrastive_loss
 from tqdm import tqdm
 import logging
+from typing import Optional
 
 
-def train(model, optimizer, count_iter, epoch, train_loader, max_count=None, print_freq=50, device='cuda'):
+def train(
+        model, optimizer, count_iter, epoch, train_loader,
+        max_count: Optional[int] = None,
+        print_freq: Optional[int] = 50, device: Optional[str] = 'cuda',
+        writer: Optional[SummaryWriter] = None
+):
     logging.info('-----EPOCH{}-----'.format(epoch+1))
     model.train()
     losses = []
@@ -42,6 +49,7 @@ def train(model, optimizer, count_iter, epoch, train_loader, max_count=None, pri
 
         count_iter += 1
         if count_iter % print_freq == 0:
+            writer.add_scalar('Loss/train', loss, count_iter)
             time2 = time.time()
             logging.info("Iteration: {0}, Time: {1:.4f} s, training loss: {2:.4f}".format(
                 count_iter,
@@ -77,6 +85,7 @@ def training(
     print_freq: int = 50,
     backup_folder: Path = None
 ):
+    writer = SummaryWriter(log_dir=output_directory / 'tensorboard_logs')
     gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
 
     nb_epochs = configuration[NB_EPOCHS]
@@ -112,7 +121,7 @@ def training(
             'configuration': configuration,
             'training_loss': epoch_losses,
         }
-
+        writer.add_scalar('Loss/validation', val_loss, epoch)
         metric_file_name = f'metrics__{epoch:04d}.json'
         metric_files_list = [output_directory/metric_file_name]
         if backup_folder is not None:
