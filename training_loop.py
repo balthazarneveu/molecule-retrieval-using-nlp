@@ -43,8 +43,9 @@ def train(model, optimizer, count_iter, epoch, train_loader, max_count=None, pri
         count_iter += 1
         if count_iter % print_freq == 0:
             time2 = time.time()
-            logging.info("Iteration: {0}, Time: {1:.4f} s, training loss: {2:.4f}".format(count_iter,
-                                                                                          time2 - time1, loss/print_freq))
+            logging.info("Iteration: {0}, Time: {1:.4f} s, training loss: {2:.4f}".format(
+                count_iter,
+                time2 - time1, loss/print_freq))
         losses.append(loss)
     return model, losses
 
@@ -102,14 +103,15 @@ def training(
         all_losses.extend(epoch_losses)
         val_loss = eval(model, val_loader, device=device)
         best_validation_loss = min(best_validation_loss, val_loss)
-        print(f'-----EPOCH {epoch+1} ----- done.   Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e}')
+        print(f'-----EPOCH {epoch+1} ----- done.   ' +
+              f'Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e}')
         metrics_dict = {
             'epoch': epoch,
             'validation_loss': val_loss,
             'configuration': configuration,
             'training_loss': epoch_losses,
         }
-        
+
         Dump.save_json(metrics_dict, output_directory/f'metrics__{epoch:04d}.json')
         if best_validation_loss == val_loss:
             print('validation loss improved saving checkpoint...')

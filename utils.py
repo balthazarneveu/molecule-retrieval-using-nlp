@@ -3,7 +3,6 @@ import argparse
 from properties import ROOT_DIR, OUT_DIR, ID, NAME, TOKENIZER_NAME
 from pathlib import Path
 from transformers import AutoTokenizer
-from pathlib import Path
 
 
 def get_device():
