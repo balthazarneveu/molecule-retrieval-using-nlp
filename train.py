@@ -2,19 +2,10 @@ from properties import ROOT_DIR
 import logging
 
 from training_loop import training
-from evaluation import evaluation
-from utils import get_device
-from experiments import get_experience
-from utils import get_default_parser, get_output_directory, get_tokenizer
+from evaluation import evaluate_experience
+from utils import prepare_experience, get_default_parser
 from pathlib import Path
 
-
-def prepare_experience(exp: int, root_dir=ROOT_DIR) -> dict:
-    model, configuration = get_experience(exp)
-    output_directory = get_output_directory(configuration, root_dir=root_dir)
-    tokenizer = get_tokenizer(configuration)
-    device = get_device()
-    return model, configuration, output_directory, tokenizer, device
 
 
 def train_experience(exp: int, root_dir: Path = ROOT_DIR, debug=False, backup_root: Path = None) -> None:
@@ -38,15 +29,10 @@ def train_experience(exp: int, root_dir: Path = ROOT_DIR, debug=False, backup_ro
     )
 
 
-def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:
-    model, configuration, output_directory, tokenizer, device = prepare_experience(exp, root_dir=root_dir)
-    evaluation(model, output_directory, configuration, tokenizer, device)
-
-
 if __name__ == '__main__':
     parser = get_default_parser()
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
     args = parser.parse_args()
     for exp in args.exp_list:
         train_experience(exp, debug=args.debug, backup_root=args.backup_root)
-        evaluate_experience(exp)
+        evaluate_experience(exp, backup_root=args.backup_root)

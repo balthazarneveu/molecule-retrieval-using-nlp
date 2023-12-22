@@ -3,6 +3,7 @@ import argparse
 from properties import ROOT_DIR, OUT_DIR, ID, NAME, TOKENIZER_NAME
 from pathlib import Path
 from transformers import AutoTokenizer
+from experiments import get_experience
 
 
 def get_device():
@@ -32,3 +33,13 @@ def get_default_parser(help="Train models") -> argparse.Namespace:
     parser.add_argument("-e", "--exp-list", nargs="+", type=int, default=[1], help="List of experiments to run")
     parser.add_argument("-dbg", "--debug", action="store_true", help="Debug mode")
     return parser
+
+
+def prepare_experience(exp: int, root_dir=ROOT_DIR, device=None) -> dict:
+    model, configuration = get_experience(exp)
+    output_directory = get_output_directory(configuration, root_dir=root_dir)
+    tokenizer = get_tokenizer(configuration)
+    if device is None:
+        device = get_device()
+        print(f"Device not specified, using default one {device}")
+    return model, configuration, output_directory, tokenizer, device

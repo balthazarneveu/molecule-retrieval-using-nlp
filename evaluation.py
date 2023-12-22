@@ -1,6 +1,7 @@
 from properties import (
     BATCH_SIZE,
-    TEST, DATA_DIR
+    TEST, DATA_DIR,
+    ROOT_DIR
 )
 from torch_geometric.data import DataLoader
 from dataloader import GraphDataset, TextDataset
@@ -10,15 +11,19 @@ from pathlib import Path
 from sklearn.metrics.pairwise import cosine_similarity
 from torch.utils.data import DataLoader as TorchDataLoader
 import pandas as pd
+from utils import get_default_parser, prepare_experience
 
 
-def evaluation(model: torch.nn.Module, model_path: Path, configuration: dict, tokenizer, device: str):
+def evaluation(
+    model: torch.nn.Module, model_path: Path, configuration: dict, tokenizer, device: str,
+    backup_root: Path = None
+):
     batch_size = configuration[BATCH_SIZE][TEST]
     print('loading best model...')
     best_model_path = sorted(list(model_path.glob("*.pt")))
     assert len(best_model_path) > 0, "No model checkpoint found at {model_path}"
     best_model_path = best_model_path[-1]
-    checkpoint = torch.load(best_model_path)
+    checkpoint = torch.load(best_model_path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     model.to(device)
@@ -52,3 +57,22 @@ def evaluation(model: torch.nn.Module, model_path: Path, configuration: dict, to
     solution['ID'] = solution.index
     solution = solution[['ID'] + [col for col in solution.columns if col != 'ID']]
     solution.to_csv(model_path/'submission.csv', index=False)
+    if backup_root is not None:
+        solution.to_csv(backup_root/'submission.csv', index=False)
+
+
+def evaluate_experience(exp: int, root_dir: Path = ROOT_DIR, backup_root: Path = None, device=None) -> None:
+    model, configuration, output_directory, tokenizer, device = prepare_experience(
+        exp,
+        root_dir=root_dir,
+        device=device
+    )
+    evaluation(model, output_directory, configuration, tokenizer, device, backup_root=backup_root)
+
+
+if __name__ == '__main__':
+    parser = get_default_parser()
+    parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
+    args = parser.parse_args()
+    for exp in args.exp_list:
+        evaluate_experience(exp, backup_root=args.backup_root, device=args.device)

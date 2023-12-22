@@ -28,6 +28,7 @@ def get_results(output_directories: Path, configuration_list: dict = None) -> di
     for exp_idx, output_directory in enumerate(output_directories):
         dumps_list = sorted(list(output_directory.glob("*.json")))
         full_data = [Dump.load_json(dump) for dump in dumps_list]
+        assert len(full_data) > 0, f"No data found in {output_directory}"
         epochs = [0] + [d['epoch']+1 for d in full_data]
         train_losses = np.array([d['training_loss'] for d in full_data])
         train_losses = train_losses.flatten()
@@ -83,7 +84,7 @@ def get_table(results: dict, kaggle_results={},
     table = Texttable(max_width=150)
     table.set_deco(Texttable.HEADER)
     header = [
-        "Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model Name",  "Model\nSize", "Batch\nsize",
+        "Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model Name",  "Model\nSize [M]", "Batch\nsize",
         "Hyper params",  "Details"]
     table_content = []
     for exp_id, res in results.items():
@@ -95,7 +96,7 @@ def get_table(results: dict, kaggle_results={},
             np.array(res["val_losses"]).min(),
             res["epochs"][-1],
             res["configuration"][NAME],
-            res["configuration"].get(MODEL_SIZE, "N/A"),
+            res["configuration"].get(MODEL_SIZE, 0)*1E-6,
             res["configuration"].get(BATCH_SIZE, {TRAIN: "N/A"})[TRAIN],
             format_hyper_params(res["configuration"]["optimizer"]),
             "\n".join(res["configuration"][ANNOTATIONS].split(" - ")),
