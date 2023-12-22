@@ -6,6 +6,7 @@ from utils import get_default_parser, get_output_directory_experiment
 from properties import ID, NAME, ANNOTATIONS
 from texttable import Texttable
 import latextable
+import logging
 
 
 def plot_metrics(results: dict) -> None:
@@ -55,20 +56,46 @@ def format_hyper_params(hyper_params: dict) -> str:
     return "\n".join([f"{key}={value}" for key, value in hyper_params.items()])
 
 
-def get_table(results: dict, caption="Impact of feature reduction", table_label="input_features_reduction"):
+def fetch_kaggle_scores(competition_name="altegrad-2023-data-challenge"):
+    import kaggle
+    kaggle.api.authenticate()
+    submissions = kaggle.api.competition_submissions(competition_name)
+    scores = {}
+    for sub in submissions:
+        if sub.ref is None:
+            continue
+        try:
+            exp_id = int(sub.description.lower().split("exp_")[1].split(" ")[0])
+            scores[exp_id] = {
+                "ref": sub.ref,
+                "date": sub.date,
+                "comment": sub.description,
+                "score": float(sub.publicScore)
+            }
+        except Exception as e:
+            logging.warning(f"Failed to parse submission {sub.ref} \n{sub.description} with error {e}")
+    return scores
+
+
+def get_table(results: dict, kaggle_results={},
+              caption="Model performances",
+              table_label="input_features_reduction"):
     table = Texttable(max_width=150)
     table.set_deco(Texttable.HEADER)
-    header = ["Experience\nID",  "Validation Loss", "Epochs", "Model", "Details", "Hyper params"]
+    header = ["Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model", "Details", "Hyper params"]
     table_content = []
     for exp_id, res in results.items():
+        kaggle_res = kaggle_results.get(exp_id, {"score": "N/A"})
+        kaggle_score = kaggle_res.get("score", "N/A")
         table_content.append([
             exp_id,
+            kaggle_score,
             np.array(res["val_losses"]).min(),
             res["epochs"][-1],
             res["configuration"][NAME],
             "\n".join(res["configuration"][ANNOTATIONS].split(" - ")),
             format_hyper_params(res["configuration"]["optimizer"]),
-           
+
         ])
     table.add_rows([
         header,
@@ -85,11 +112,13 @@ if __name__ == '__main__':
     parser = get_default_parser(help="Plot metrics")
     parser.add_argument("-t", "--table", action="store_true", help="Print table")
     parser.add_argument("-p", "--plot", action="store_true", help="Plot Curves")
+    parser.add_argument("-nok", "--disable-kaggle", action="store_true", help="Disable Kaggle fetching scores")
     args = parser.parse_args()
     exp_dir = [get_output_directory_experiment(exp) for exp in args.exp_list]
 
     results = get_results(exp_dir, configuration_list=None)
     if args.table:
-        get_table(results)
+        kaggle_results = {} if args.disable_kaggle else fetch_kaggle_scores()
+        get_table(results, kaggle_results=kaggle_results)
     if args.plot:
         plot_metrics(results)
