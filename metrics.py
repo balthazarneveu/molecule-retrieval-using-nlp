@@ -82,7 +82,9 @@ def get_table(results: dict, kaggle_results={},
               table_label="input_features_reduction"):
     table = Texttable(max_width=150)
     table.set_deco(Texttable.HEADER)
-    header = ["Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model Name",  "Model\nSize", "Batch\nsize", "Hyper params",  "Details"]
+    header = [
+        "Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model Name",  "Model\nSize", "Batch\nsize",
+        "Hyper params",  "Details"]
     table_content = []
     for exp_id, res in results.items():
         kaggle_res = kaggle_results.get(exp_id, {"score": "N/A"})

@@ -6,6 +6,7 @@ from evaluation import evaluation
 from utils import get_device
 from experiments import get_experience
 from utils import get_default_parser, get_output_directory, get_tokenizer
+from pathlib import Path
 
 
 def prepare_experience(exp: int, root_dir=ROOT_DIR) -> dict:
@@ -16,7 +17,7 @@ def prepare_experience(exp: int, root_dir=ROOT_DIR) -> dict:
     return model, configuration, output_directory, tokenizer, device
 
 
-def train_experience(exp: int, root_dir=ROOT_DIR, debug=False) -> None:
+def train_experience(exp: int, root_dir: Path = ROOT_DIR, debug=False, backup_root: Path = None) -> None:
     if debug:
         print_freq = 1
     else:
@@ -26,7 +27,15 @@ def train_experience(exp: int, root_dir=ROOT_DIR, debug=False) -> None:
         logging.warning(f"Experience {exp} already trained")
         return
     output_directory.mkdir(exist_ok=True, parents=True)
-    training(model, output_directory, configuration, tokenizer, device, print_freq=print_freq)
+    backup_folder = None
+    if backup_root is not None:
+        backup_folder = backup_root/output_directory.name
+        backup_folder.mkdir(exist_ok=True, parents=True)
+    training(
+        model, output_directory, configuration, tokenizer,
+        device, print_freq=print_freq,
+        backup_folder=backup_folder
+    )
 
 
 def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:

@@ -74,7 +74,8 @@ def training(
     model: torch.nn.Module,
     output_directory: Path, configuration: dict, tokenizer: PreTrainedTokenizer,
     device: str,
-    print_freq: int = 50
+    print_freq: int = 50,
+    backup_folder: Path = None
 ):
     gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
 
@@ -112,17 +113,26 @@ def training(
             'training_loss': epoch_losses,
         }
 
-        Dump.save_json(metrics_dict, output_directory/f'metrics__{epoch:04d}.json')
+        metric_file_name = f'metrics__{epoch:04d}.json'
+        metric_files_list = [output_directory/metric_file_name]
+        if backup_folder is not None:
+            metric_files_list.append(backup_folder/metric_file_name)
+        for metric_file_path in metric_files_list:
+            Dump.save_json(metrics_dict, metric_file_path)
         if best_validation_loss == val_loss:
             print('validation loss improved saving checkpoint...')
-
-            save_path = os.path.join(output_directory, f'model_{epoch:04d}.pt')
-            torch.save({
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'validation_accuracy': val_loss,
-                'configuration': configuration,
-                'loss': loss,
-            }, save_path)
+            model_file_name = f'model_{epoch:04d}.pt'
+            save_path = os.path.join(output_directory, model_file_name)
+            save_path_list = [save_path]
+            if backup_folder is not None:
+                save_path_list.append(os.path.join(backup_folder, model_file_name))
+            for save_path in save_path_list:
+                torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'validation_accuracy': val_loss,
+                    'configuration': configuration,
+                    'loss': loss,
+                }, save_path)
             print('checkpoint saved to: {}'.format(save_path))
