@@ -4,6 +4,7 @@ from properties import ROOT_DIR, OUT_DIR, ID, NAME, TOKENIZER_NAME
 from pathlib import Path
 from transformers import AutoTokenizer
 from experiments import get_experience
+from typing import Tuple
 
 
 def get_device():
@@ -35,11 +36,17 @@ def get_default_parser(help="Train models") -> argparse.Namespace:
     return parser
 
 
-def prepare_experience(exp: int, root_dir=ROOT_DIR, device=None) -> dict:
+def prepare_experience(
+        exp: int, root_dir: Path=ROOT_DIR, device=None, backup_root: Path = None
+) -> Tuple[torch.nn.Module, dict, Path, AutoTokenizer, torch.device, Path]:
     model, configuration = get_experience(exp)
     output_directory = get_output_directory(configuration, root_dir=root_dir)
     tokenizer = get_tokenizer(configuration)
     if device is None:
         device = get_device()
         print(f"Device not specified, using default one {device}")
-    return model, configuration, output_directory, tokenizer, device
+    backup_folder = None
+    if backup_root is not None:
+        backup_folder = backup_root/output_directory.name
+        backup_folder.mkdir(exist_ok=True, parents=True)
+    return model, configuration, output_directory, tokenizer, device, backup_folder

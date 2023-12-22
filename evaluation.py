@@ -12,12 +12,31 @@ from sklearn.metrics.pairwise import cosine_similarity
 from torch.utils.data import DataLoader as TorchDataLoader
 import pandas as pd
 from utils import get_default_parser, prepare_experience
+from tqdm import tqdm
+import logging
 
 
 def evaluation(
     model: torch.nn.Module, model_path: Path, configuration: dict, tokenizer, device: str,
-    backup_root: Path = None
+    backup_folder: Path = None, override: bool = False
 ):
+    """Prepare results on a test set to be submitted to the Kaggle competition
+
+    Args:
+        model (torch.nn.Module): torch model to be evaluated
+        model_path (Path): folder with trained model weights
+        configuration (dict): configuration dictionary
+        tokenizer: Required to encode text
+        device (str): cpu or cuda
+        backup_folder (Path, optional): Backup for Collab. Defaults to None.
+    """
+    submission_csv_file = model_path/'submission.csv'
+    if submission_csv_file.exists():
+        print(f"Experience {model_path} already evaluated")
+        if not override:
+            return
+        else:
+            logging.warning(f"Overriding results for experience {model_path}")
     batch_size = configuration[BATCH_SIZE][TEST]
     print('loading best model...')
     best_model_path = sorted(list(model_path.glob("*.pt")))
@@ -39,14 +58,14 @@ def evaluation(
         test_cids_dataset, batch_size=batch_size, shuffle=False)
 
     graph_embeddings = []
-    for batch in test_loader:
+    for _, batch in tqdm(enumerate(test_loader), total=len(test_loader), desc="Test Graph"):
         for output in graph_model(batch.to(device)):
             graph_embeddings.append(output.tolist())
 
     test_text_loader = TorchDataLoader(
         test_text_dataset, batch_size=batch_size, shuffle=False)
     text_embeddings = []
-    for batch in test_text_loader:
+    for _, batch in tqdm(enumerate(test_text_loader), total=len(test_text_loader), desc="Test Text"):
         for output in text_model(batch['input_ids'].to(device),
                                  attention_mask=batch['attention_mask'].to(device)):
             text_embeddings.append(output.tolist())
@@ -56,23 +75,33 @@ def evaluation(
     solution = pd.DataFrame(similarity)
     solution['ID'] = solution.index
     solution = solution[['ID'] + [col for col in solution.columns if col != 'ID']]
-    solution.to_csv(model_path/'submission.csv', index=False)
-    if backup_root is not None:
-        solution.to_csv(backup_root/'submission.csv', index=False)
+    solution.to_csv(submission_csv_file, index=False)
+    if backup_folder is not None:
+        solution.to_csv(backup_folder/'submission.csv', index=False)
 
 
-def evaluate_experience(exp: int, root_dir: Path = ROOT_DIR, backup_root: Path = None, device=None) -> None:
-    model, configuration, output_directory, tokenizer, device = prepare_experience(
+def evaluate_experience(
+    exp: int,
+        root_dir: Path = ROOT_DIR, backup_root: Path = None,
+        override: bool = False,
+        device=None
+    ) -> None:
+    model, configuration, output_directory, tokenizer, device, backup_folder = prepare_experience(
         exp,
         root_dir=root_dir,
-        device=device
+        device=device,
+        backup_root=backup_root
     )
-    evaluation(model, output_directory, configuration, tokenizer, device, backup_root=backup_root)
+    evaluation(
+        model, output_directory, configuration, tokenizer, device, backup_folder=backup_folder,
+        override=override
+    )
 
 
 if __name__ == '__main__':
     parser = get_default_parser()
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
+    parser.add_argument("-force", "--force", action="store_true", help="Override results")
     args = parser.parse_args()
     for exp in args.exp_list:
-        evaluate_experience(exp, backup_root=args.backup_root, device=args.device)
+        evaluate_experience(exp, backup_root=args.backup_root, device=args.device, override=args.force)

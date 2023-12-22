@@ -7,3 +7,17 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
 - Authors
     - [Balthazar Neveu](https://github.com/balthazarneveu)
 - [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge)
+
+
+## Training
+Add a new experiment `X` to [experiments](/experiments.py) defined by a given number.
+Commit your file, we need to track results.
+```shell
+python train.py -e X
+```
+
+Evaluation of a model
+```shell
+python evaluation.py -e X
+```
+This will generate a submission.csv
