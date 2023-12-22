@@ -11,7 +11,7 @@ def get_cpu_info():
         "Physical cores": psutil.cpu_count(logical=False),
         "Total cores": psutil.cpu_count(logical=True),
         "Memory": ram_gb,
-        "Max Frequency": f"{psutil.cpu_freq().current:.2f}Mhz"
+        "Max Frequency": f"{(psutil.cpu_freq().current/1000):.1f}Ghz"
     }
     return cpu_info
 
@@ -22,17 +22,18 @@ def get_gpu_info():
         gpu_info["CUDA Version"] = torch.version.cuda
         gpu_info["Number of GPUs"] = torch.cuda.device_count()
         gpu_info["GPU Name"] = torch.cuda.get_device_name(0)
+        gpu_info["Memory"] = torch.cuda.mem_get_info()[1]
     return gpu_info
 
 
 def create_summary(cpu_info, gpu_info):
     summary_parts = [
-        f"{cpu_info['Total cores']} CPU cores {cpu_info['Processor']}",
+        f"{cpu_info['Total cores']} CPU cores {cpu_info['Max Frequency']} {cpu_info['Processor']}",
         f"{cpu_info['Memory']:.2f} GB",
     ]
 
     if 'Number of GPUs' in gpu_info and gpu_info['Number of GPUs'] > 0:
-        summary_parts.append(f"{gpu_info['Number of GPUs']} {gpu_info['GPU Name']}")
+        summary_parts.append(f"{gpu_info['Number of GPUs']} {gpu_info['GPU Name']} {gpu_info['Memory']/1024**3:.1f}Gb")
 
     return " - ".join(summary_parts)
 
