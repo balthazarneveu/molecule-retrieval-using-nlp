@@ -2,6 +2,7 @@ import platform
 import psutil
 from psutil import virtual_memory
 import torch
+import subprocess
 
 
 def get_cpu_info():
@@ -48,5 +49,17 @@ def get_hardware_descriptor() -> dict:
     return {"description": summary, "cpu": cpu_info, "gpu": gpu_info}
 
 
+# Function to get the current Git SHA1 hash
+def get_git_sha1():
+    try:
+        # Running the git command to get the SHA1 hash
+        sha1 = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode()
+        return sha1
+    except subprocess.CalledProcessError as e:
+        # In case the git command fails (e.g., not a git repository)
+        return "Error: " + str(e)
+
+
 if __name__ == "__main__":
+    print(get_git_sha1())
     print(get_hardware_descriptor()["description"])
