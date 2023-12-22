@@ -14,7 +14,7 @@ def train_experience(
         backup_root: Path = None
 ) -> None:
     if debug:
-        print_freq = 1
+        print_freq = 5
     else:
         print_freq = 50
     model, configuration, output_directory, tokenizer, device, backup_folder = prepare_experience(

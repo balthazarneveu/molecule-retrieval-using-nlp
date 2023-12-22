@@ -11,7 +11,6 @@ from platform_description import get_hardware_descriptor, get_git_sha1
 def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
     configuration = {
         NB_EPOCHS: 5,
-        # batch_size : 32
         BATCH_SIZE: [16, 8, 8],  # To fit Nvidia T500 4Gb RAM
         OPTIMIZER: {
             LEARNING_RATE: 2e-5,
@@ -24,10 +23,11 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
     if exp == 0:
         configuration[NAME] = 'check-pipeline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Check pipeline'
-        configuration[MAX_STEP_PER_EPOCH] = 5
+        configuration[MAX_STEP_PER_EPOCH] = 60
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=8, graph_hidden_channels=8)
     if exp == 1:
+        configuration[NB_EPOCHS] = 5
         configuration[NAME] = 'Baseline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers'
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
