@@ -3,7 +3,7 @@ from pathlib import Path
 from data_dumps import Dump
 import numpy as np
 from utils import get_default_parser, get_output_directory_experiment
-from properties import ID, NAME, ANNOTATIONS
+from properties import ID, NAME, ANNOTATIONS, BATCH_SIZE, MODEL_SIZE, TRAIN
 from texttable import Texttable
 import latextable
 import logging
@@ -82,7 +82,7 @@ def get_table(results: dict, kaggle_results={},
               table_label="input_features_reduction"):
     table = Texttable(max_width=150)
     table.set_deco(Texttable.HEADER)
-    header = ["Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model", "Details", "Hyper params"]
+    header = ["Experience\nID",  "Score [%]", "Validation Loss", "Epochs", "Model Name",  "Model\nSize", "Batch\nsize", "Hyper params",  "Details"]
     table_content = []
     for exp_id, res in results.items():
         kaggle_res = kaggle_results.get(exp_id, {"score": "N/A"})
@@ -93,8 +93,10 @@ def get_table(results: dict, kaggle_results={},
             np.array(res["val_losses"]).min(),
             res["epochs"][-1],
             res["configuration"][NAME],
-            "\n".join(res["configuration"][ANNOTATIONS].split(" - ")),
+            res["configuration"].get(MODEL_SIZE, "N/A"),
+            res["configuration"].get(BATCH_SIZE, {TRAIN: "N/A"})[TRAIN],
             format_hyper_params(res["configuration"]["optimizer"]),
+            "\n".join(res["configuration"][ANNOTATIONS].split(" - ")),
 
         ])
     table.add_rows([

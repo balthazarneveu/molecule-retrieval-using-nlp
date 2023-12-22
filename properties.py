@@ -1,6 +1,7 @@
 from pathlib import Path
 NB_EPOCHS = "nb_epochs"
 BATCH_SIZE = "batch_size"
+MODEL_SIZE = "model_size"
 LEARNING_RATE = "lr"
 TOKENIZER_NAME = "tokenizer_model_name"
 NAME = "name"
