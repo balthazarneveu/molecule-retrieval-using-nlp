@@ -5,8 +5,7 @@ from training_loop import training
 from evaluation import evaluation
 from utils import get_device
 from experiments import get_experience
-
-from utils import parse_args, get_output_directory, get_tokenizer
+from utils import get_default_parser, get_output_directory, get_tokenizer
 
 
 def prepare_experience(exp: int, root_dir=ROOT_DIR) -> dict:
@@ -39,7 +38,7 @@ def evaluate_experience(exp: int, root_dir=ROOT_DIR) -> None:
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    args = get_default_parser().parse_args
     for exp in args.exp_list:
         train_experience(exp, debug=args.debug)
         evaluate_experience(exp)
