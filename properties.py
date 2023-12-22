@@ -12,6 +12,7 @@ OPTIMIZER = "optimizer"
 TRAIN, VALIDATION, TEST = "train", "validation", "test"
 DEVICE = "device"
 ID = "id"
+PLATFORM = "platform"
 MAX_STEP_PER_EPOCH = "max_step_per_epoch"
 ROOT_DIR = Path(__file__).parent
 DATA_DIR = ROOT_DIR / '__data'
