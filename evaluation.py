@@ -34,7 +34,7 @@ def evaluation(
     if submission_csv_file.exists():
         print(f"Experience {model_path} already evaluated")
         if not override:
-            return
+            return submission_csv_file
         else:
             logging.warning(f"Overriding results for experience {model_path}")
     batch_size = configuration[BATCH_SIZE][TEST]
@@ -78,24 +78,28 @@ def evaluation(
     solution.to_csv(submission_csv_file, index=False)
     if backup_folder is not None:
         solution.to_csv(backup_folder/'submission.csv', index=False)
+    return submission_csv_file
 
 
 def evaluate_experience(
     exp: int,
-        root_dir: Path = ROOT_DIR, backup_root: Path = None,
-        override: bool = False,
-        device=None
-    ) -> None:
+    root_dir: Path = ROOT_DIR, backup_root: Path = None,
+    override: bool = False,
+    device=None
+) -> None:
     model, configuration, output_directory, tokenizer, device, backup_folder = prepare_experience(
         exp,
         root_dir=root_dir,
         device=device,
         backup_root=backup_root
     )
-    evaluation(
+    submission_csv_file = evaluation(
         model, output_directory, configuration, tokenizer, device, backup_folder=backup_folder,
         override=override
     )
+    sha1 = "<sha1>"
+    message = f"exp_{exp} sha1: {sha1} config: {configuration}"
+    print(f'kaggle competitions submit -c altegrad-2023-data-challenge -f {submission_csv_file} -m "{message}"')
 
 
 if __name__ == '__main__':
