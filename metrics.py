@@ -68,7 +68,7 @@ def fetch_kaggle_scores(competition_name="altegrad-2023-data-challenge"):
         try:
             exp_id = int(sub.description.lower().split("exp_")[1].split(" ")[0])
             if exp_id in scores.keys():
-                if float(sub.publicScore)<scores[exp_id]["score"]:
+                if float(sub.publicScore) < scores[exp_id]["score"]:
                     logging.warning(f"Found a better score for {exp_id} {sub.ref} \n{sub.description}")
                     continue
             scores[exp_id] = {
