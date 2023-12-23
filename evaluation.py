@@ -87,7 +87,8 @@ def evaluation(
         gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
         val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-        eval(model, val_loader, device=device, max_count=None)
+        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True)
+        print(lrap_score)
     return submission_csv_file
 
 

@@ -102,7 +102,7 @@ def training(
                                     max_count=max_count, print_freq=print_freq, device=device,
                                     writer=writer_tra)
         all_losses.extend(epoch_losses)
-        val_loss = eval(model, val_loader, device=device, max_count=max_count)
+        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count)
         best_validation_loss = min(best_validation_loss, val_loss)
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
               f'Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e}')
