@@ -77,6 +77,15 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
         model.load_state_dict(
             torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
+    if exp == 7:
+        configuration[BATCH_SIZE] = (64, 64, 64)    # Kaggle
+        configuration[NB_EPOCHS] = 60
+        configuration[OPTIMIZER][LEARNING_RATE] = 5e-6
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - Kaggle'
+        model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+                      nhid=600, graph_hidden_channels=600)  # nout = bert model hidden dim
     configuration[ID] = exp
     configuration[PLATFORM] = get_hardware_descriptor()
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
