@@ -51,6 +51,13 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers - Collab'
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
+    if exp == 5:
+        configuration[BATCH_SIZE] = (96, 64, 64)  # Collab
+        configuration[NB_EPOCHS] = 60
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - Collab'
+        model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+                      nhid=600, graph_hidden_channels=600)  # nout = bert model hidden dim
     configuration[ID] = exp
     configuration[PLATFORM] = get_hardware_descriptor()
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
