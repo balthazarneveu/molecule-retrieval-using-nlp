@@ -115,7 +115,8 @@ def evaluate_experience(
     )
     sha1 = get_git_sha1()
     message = f"exp_{exp} sha1: {sha1} config: {configuration}"
-    print(f'kaggle competitions submit -c altegrad-2023-data-challenge -f {submission_csv_file} -m "{message}"')
+    if phase == TEST:
+        print(f'kaggle competitions submit -c altegrad-2023-data-challenge -f {submission_csv_file} -m "{message}"')
 
 
 if __name__ == '__main__':
