@@ -60,9 +60,10 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=600, graph_hidden_channels=600)  # nout = bert model hidden dim
     if exp == 6:
-        configuration[BATCH_SIZE] = (96, 64, 64)  # Collab
+        configuration[BATCH_SIZE] = (64, 64, 64)  # Collab
         configuration[NB_EPOCHS] = 60
-        configuration[OPTIMIZER][LEARNING_RATE] = 1e-3
+        configuration[OPTIMIZER][LEARNING_RATE] = 1e-5
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.05
         configuration[NAME] = 'Baseline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers - Collab - Restart exp 5'
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
