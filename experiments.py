@@ -75,7 +75,7 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
             raise ValueError("No root_dir or backup_root provided")
         assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
         model.load_state_dict(
-            torch.load(), map_location='cpu')
+            torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
     configuration[ID] = exp
     configuration[PLATFORM] = get_hardware_descriptor()
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
