@@ -6,9 +6,10 @@ import torch
 from model import Model
 from typing import Tuple
 from platform_description import get_hardware_descriptor, get_git_sha1
+from pathlib import Path
 
 
-def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
+def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) -> Tuple[torch.nn.Module, dict]:
     configuration = {
         NB_EPOCHS: 5,
         BATCH_SIZE: [16, 8, 8],  # To fit Nvidia T500 4Gb RAM
@@ -58,6 +59,23 @@ def get_experience(exp: int) -> Tuple[torch.nn.Module, dict]:
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers - Collab'
         model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
                       nhid=600, graph_hidden_channels=600)  # nout = bert model hidden dim
+    if exp == 6:
+        configuration[BATCH_SIZE] = (96, 64, 64)  # Collab
+        configuration[NB_EPOCHS] = 60
+        configuration[OPTIMIZER][LEARNING_RATE] = 1e-3
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - Collab - Restart exp 5'
+        model = Model(model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+                      nhid=600, graph_hidden_channels=600)  # nout = bert model hidden dim
+        if backup_root is not None:
+            pretrained_model_path = backup_root/'0005_Baseline-BERT-GCN/model_0009.pt'
+        elif root_dir is not None:
+            pretrained_model_path = root_dir/'__output'/'0005_Baseline-BERT-GCN/model_0009.pt'
+        else:
+            raise ValueError("No root_dir or backup_root provided")
+        assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
+        model.load_state_dict(
+            torch.load(), map_location='cpu')
     configuration[ID] = exp
     configuration[PLATFORM] = get_hardware_descriptor()
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

@@ -39,7 +39,7 @@ def get_default_parser(help="Train models") -> argparse.Namespace:
 def prepare_experience(
         exp: int, root_dir: Path = ROOT_DIR, device=None, backup_root: Path = None
 ) -> Tuple[torch.nn.Module, dict, Path, AutoTokenizer, torch.device, Path]:
-    model, configuration = get_experience(exp)
+    model, configuration = get_experience(exp, root_dir=root_dir, backup_root=backup_root)
     output_directory = get_output_directory(configuration, root_dir=root_dir)
     tokenizer = get_tokenizer(configuration)
     if device is None:

@@ -1,4 +1,4 @@
-from properties import ROOT_DIR
+from properties import ROOT_DIR, VALIDATION, TEST
 import logging
 
 from training_loop import training
@@ -39,4 +39,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     for exp in args.exp_list:
         train_experience(exp, debug=args.debug, backup_root=args.backup_root, device=args.device)
-        evaluate_experience(exp, backup_root=args.backup_root, device=args.device)
+        for phase in [VALIDATION, TEST]:
+            evaluate_experience(exp, backup_root=args.backup_root, device=args.device, phase=phase)
