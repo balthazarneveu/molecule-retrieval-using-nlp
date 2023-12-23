@@ -3,7 +3,6 @@ from tqdm import tqdm
 from typing import Optional
 from sklearn.metrics import label_ranking_average_precision_score
 import numpy as np
-import torch
 from sklearn.metrics.pairwise import cosine_similarity
 
 

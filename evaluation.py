@@ -1,6 +1,6 @@
 from properties import (
     BATCH_SIZE,
-    TEST, VALIDATION, DATA_DIR,
+    TEST, VALIDATION, DATA_DIR, PLATFORM,
     ROOT_DIR
 )
 from torch_geometric.data import DataLoader
@@ -43,6 +43,9 @@ def evaluation(
         else:
             logging.warning(f"Overriding results for experience {model_path}")
     batch_size = configuration[BATCH_SIZE][phase]
+    if configuration[PLATFORM]["gpu"]["Memory"]/(1024.**3) < 5.:
+        logging.warning("Tiny GPU!")
+        batch_size = min(batch_size, 8)
     print('loading best model...')
     best_model_path = sorted(list(model_path.glob("*.pt")))
     assert len(best_model_path) > 0, "No model checkpoint found at {model_path}"
