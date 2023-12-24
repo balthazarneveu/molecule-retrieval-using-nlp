@@ -1,5 +1,4 @@
 from pathlib import Path
-import cv2 as cv
 import json
 import logging
 import pickle
@@ -11,21 +10,6 @@ try:
 except ImportError as e:
     YAML_SUPPORT = False
     logging.warning(f"{e}\n{YAML_NOT_DETECTED_MESSAGE}")
-
-
-class Image:
-    @staticmethod
-    def load(path: Path):
-        assert path.exists()
-        image = cv.imread(str(path))
-        image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-        return image
-
-    @staticmethod
-    def write(path: Path, img):
-        image = cv.cvtColor(img, cv.COLOR_RGB2BGR)
-        cv.imwrite(str(path), image)
-
 
 class Dump:
     @staticmethod
