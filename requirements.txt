@@ -1,0 +1,14 @@
+kaggle
+latextable
+matplotlib
+numpy
+pandas
+psutil
+PyYAML
+scikit_learn
+texttable
+torch
+torch_geometric
+tqdm
+transformers
+tensorboard
