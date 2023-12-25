@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter1d
 from pathlib import Path
 from data_dumps import Dump
 import numpy as np
@@ -14,10 +15,16 @@ def plot_metrics(results: dict) -> None:
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     for exp_idx, (exp_id, res) in enumerate(results.items()):
         color = colors[exp_idx]
-        plt.plot(res["timeline_steps"], res["train_losses"], "-.", alpha=0.5, color=color,
+        tloss = res["train_losses"]
+        dec = 1
+        tloss = gaussian_filter1d(tloss, 20)[::dec]
+        tstep = res["timeline_steps"]
+        tstep = tstep[::dec]
+        plt.plot(tstep, tloss, "-.", alpha=0.5, color=color,
                  label=f"{res['name']} train loss")
         plt.plot(res["epochs"][1:], res["val_losses"], "-o", color=color,
                  label=f"{res['name']} valid loss")
+    plt.ylim(0, 1)
     plt.legend()
     plt.grid()
     plt.show()
@@ -116,13 +123,12 @@ def get_table(results: dict, kaggle_results={},
         caption=caption,
         label=f"table:{table_label.replace(' ', '_')}"))
 
-
-if __name__ == '__main__':
+def main(argv):
     parser = get_default_parser(help="Plot metrics")
     parser.add_argument("-t", "--table", action="store_true", help="Print table")
     parser.add_argument("-p", "--plot", action="store_true", help="Plot Curves")
     parser.add_argument("-nok", "--disable-kaggle", action="store_true", help="Disable Kaggle fetching scores")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     exp_dir = [get_output_directory_experiment(exp) for exp in args.exp_list]
 
     results = get_results(exp_dir, configuration_list=None)
@@ -131,3 +137,7 @@ if __name__ == '__main__':
         get_table(results, kaggle_results=kaggle_results)
     if args.plot:
         plot_metrics(results)
+
+if __name__ == '__main__':
+    import sys
+    main(sys.argv[1:])
