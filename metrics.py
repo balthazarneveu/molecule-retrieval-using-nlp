@@ -10,7 +10,7 @@ import latextable
 import logging
 
 
-def plot_metrics(results: dict) -> None:
+def plot_metrics(results: dict, ylim=[]) -> None:
     plt.figure(figsize=(12, 8))
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     for exp_idx, (exp_id, res) in enumerate(results.items()):
@@ -24,7 +24,8 @@ def plot_metrics(results: dict) -> None:
                  label=f"{res['name']} train loss")
         plt.plot(res["epochs"][1:], res["val_losses"], "-o", color=color,
                  label=f"{res['name']} valid loss")
-    plt.ylim(0, 1)
+    if len(ylim) >=1:
+        plt.ylim(ylim[0], None if len(ylim)==1 else ylim[1])
     plt.legend()
     plt.grid()
     plt.show()
@@ -128,6 +129,7 @@ def main(argv):
     parser.add_argument("-t", "--table", action="store_true", help="Print table")
     parser.add_argument("-p", "--plot", action="store_true", help="Plot Curves")
     parser.add_argument("-nok", "--disable-kaggle", action="store_true", help="Disable Kaggle fetching scores")
+    parser.add_argument("-y", "--ylim", type=int, default=[], nargs="+")
     args = parser.parse_args(argv)
     exp_dir = [get_output_directory_experiment(exp) for exp in args.exp_list]
 
@@ -136,7 +138,7 @@ def main(argv):
         kaggle_results = {} if args.disable_kaggle else fetch_kaggle_scores()
         get_table(results, kaggle_results=kaggle_results)
     if args.plot:
-        plot_metrics(results)
+        plot_metrics(results, ylim=args.ylim)
 
 if __name__ == '__main__':
     import sys
