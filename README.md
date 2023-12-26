@@ -8,6 +8,10 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
     - [Balthazar Neveu](https://github.com/balthazarneveu)
 - [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge)
 
+## Colab setup
+- Setup a drive folder named `molecules-nlp` where you can store results checkpoints
+- Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training.
+
 
 ## Training
 Add a new experiment `X` to [experiments](/experiments.py) defined by a given number.
@@ -15,6 +19,8 @@ Commit your file, we need to track results.
 ```shell
 python train.py -e X
 ```
+
+
 
 ## Metrics, evaluation
 #### Check metrics
