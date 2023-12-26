@@ -126,6 +126,16 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         model = Model(
             model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
             nhid=300, graph_hidden_channels=300)
+    if exp == 12:
+        configuration[BATCH_SIZE] = (32, 32, 32)    # RTX2060
+        configuration[NB_EPOCHS] = 60
+        configuration[OPTIMIZER][LEARNING_RATE] = 5e-5
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 1.
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - RTX2060'
+        model = Model(
+            model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+            nhid=300, graph_hidden_channels=300)
     configuration[ID] = exp
     configuration[PLATFORM] = get_hardware_descriptor()
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
