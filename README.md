@@ -27,6 +27,10 @@ python3 metrics.py -e 2 3 4 -t -p
 - `-t` to display a result table :bulb: `-nok` will disable Kaggle score retrieval
 
 
+#### Tensorboard
+```bash
+tensorboard --logdir __tensorboard_logs
+```
 #### Evaluation and submission
 Evaluation of various models
 ```shell
