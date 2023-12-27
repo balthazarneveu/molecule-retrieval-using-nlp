@@ -1,10 +1,11 @@
 import torch
 import argparse
+import wandb
 from properties import ROOT_DIR, OUT_DIR, ID, NAME, TOKENIZER_NAME
 from pathlib import Path
 from transformers import AutoTokenizer
 from experiments import get_experience
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 def get_device():
@@ -33,7 +34,12 @@ def get_default_parser(help="Train models") -> argparse.Namespace:
                         choices=["cpu", "cuda"], default=str(get_device()), help="Training device")
     parser.add_argument("-e", "--exp-list", nargs="+", type=int, default=[1], help="List of experiments to run")
     parser.add_argument("-dbg", "--debug", action="store_true", help="Debug mode")
+    
     return parser
+
+
+def wandb_login(wandb_api_key: Optional[str] = None):
+    wandb.login(key=wandb_api_key)
 
 
 def prepare_experience(

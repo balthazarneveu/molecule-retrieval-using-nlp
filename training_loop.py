@@ -18,6 +18,7 @@ from tqdm import tqdm
 import logging
 from typing import Optional
 from validation import eval
+import wandb
 
 
 def train(
@@ -70,7 +71,8 @@ def training(
     device: str,
     print_freq: int = 50,
     backup_folder: Path = None,
-    tensorboard_root: Path = ROOT_DIR / '__tensorboard_logs'
+    tensorboard_root: Path = ROOT_DIR / '__tensorboard_logs',
+    wandb_flag: bool = True
 ):
     tensorboard_root.mkdir(exist_ok=True, parents=True)
     tensorboard_dir = tensorboard_root / output_directory.name
@@ -113,6 +115,8 @@ def training(
             'training_loss': epoch_losses,
         }
         writer_val.add_scalar('Loss', val_loss, (epoch+1) * len(train_loader) + len(train_loader))
+        if wandb_flag:
+            wandb.log({"Validation Loss": val_loss})
         metric_file_name = f'metrics__{epoch:04d}.json'
         metric_files_list = [output_directory/metric_file_name]
         if backup_folder is not None:
