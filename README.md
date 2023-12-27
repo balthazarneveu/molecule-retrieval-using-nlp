@@ -6,9 +6,21 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
 - Program: [MVA Master's degree](https://www.master-mva.com/) class on language and graph learning [ALTEGRAD](https://www.master-mva.com/cours/cat-advanced-learning-for-text-and-graph-data-altegrad/). ENS Paris-Saclay.
 - Authors
     - [Balthazar Neveu](https://github.com/balthazarneveu)
-- [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge)
+    - [Basile Terver](https://github.com/Basile-Terv)
+    - [Lea Khalil](https://github.com/lea-khalil)
 
-## Remote setup
+-----
+- :medal_military: [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge)
+- :trophy: [Weights and biases](https://wandb.ai/molecule-nlp-altegrad-23)
+------
+# :gear: Setup
+Everything can be trained locally
+
+
+## :satellite: Remote setup
+Supported platforms for training:
+- Google Colab
+- Kaggle
 
 #### :key: Secrets
 Set secrets in Colab or Kaggle: 
@@ -19,10 +31,11 @@ Set secrets in Colab or Kaggle:
 
 #### :scroll: Notebook
 - Setup a drive folder named `molecules-nlp` where you can store results checkpoints
-- Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training.
+- Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training, ready for Colab & Kaggle.
 
 
-## Training
+# :toolbox: Experimenting
+## :jigsaw: Training 
 Add a new experiment `X` to [experiments](/experiments.py) defined by a given number.
 Commit your file, we need to track results.
 ```shell
@@ -31,7 +44,7 @@ python train.py -e X
 
 
 
-## Metrics, evaluation
+## :triangular_ruler: Metrics, evaluation
 #### Check metrics
 
 
@@ -41,12 +54,14 @@ python3 metrics.py -e 2 3 4 -t -p
 - `-p` to plot training curves
 - `-t` to display a result table :bulb: `-nok` will disable Kaggle score retrieval
 
+#### :chart_with_upwards_trend: Weights and Biases
+[wandb.ai/molecule-nlp-altegrad-23](https://wandb.ai/molecule-nlp-altegrad-23)
 
-#### Tensorboard
+#### :chart_with_downwards_trend: Tensorboard
 ```bash
 tensorboard --logdir __tensorboard_logs
 ```
-#### Evaluation and submission
+#### :rocket: Evaluation and submission
 Evaluation of various models
 ```shell
 python evaluation.py -e X Y Z
