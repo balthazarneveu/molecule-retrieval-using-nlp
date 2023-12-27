@@ -104,19 +104,21 @@ def training(
                                     max_count=max_count, print_freq=print_freq, device=device,
                                     writer=writer_tra)
         all_losses.extend(epoch_losses)
-        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count)
+        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count, score=True)
         best_validation_loss = min(best_validation_loss, val_loss)
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
-              f'Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e}')
+              f'Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e} | lrap_score: {lrap_score:.3e}')
         metrics_dict = {
             'epoch': epoch,
             'validation_loss': val_loss,
             'configuration': configuration,
             'training_loss': epoch_losses,
+            'lrap_score': lrap_score,
         }
         writer_val.add_scalar('Loss', val_loss, (epoch+1) * len(train_loader) + len(train_loader))
+        writer_val.add_scalar('Score', lrap_score, (epoch+1) * len(train_loader) + len(train_loader))
         if wandb_flag:
-            wandb.log({"Validation Loss": val_loss})
+            wandb.log({"Validation Loss": val_loss, "Score": lrap_score})
         metric_file_name = f'metrics__{epoch:04d}.json'
         metric_files_list = [output_directory/metric_file_name]
         if backup_folder is not None:
