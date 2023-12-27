@@ -4,9 +4,9 @@ from torch_geometric.nn import global_mean_pool
 from generic import GenericModel
 
 
-class GraphEncoder(GenericModel):
+class BasicGraphEncoder(GenericModel):
     def __init__(self, num_node_features, nout, nhid, graph_hidden_channels):
-        super(GraphEncoder, self).__init__()
+        super().__init__()
         self.nhid = nhid
         self.nout = nout
         self.relu = torch.nn.ReLU()

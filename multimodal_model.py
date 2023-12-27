@@ -20,8 +20,8 @@ class MultimodalModel(GenericModel):
 
 if __name__ == "__main__":
     from language_model import TextEncoder
-    from graph_model import GraphEncoder
-    graph_encoder = GraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
-    text_encoder = TextEncoder(freeze=False)
+    from graph_model import BasicGraphEncoder
+    graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
+    text_encoder = TextEncoder(freeze=True)
     model = MultimodalModel(graph_encoder, text_encoder)
     print(model.count_params())
