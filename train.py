@@ -31,6 +31,7 @@ def train_experience(
     if wandb_flag:
         wandb.init(
             project="molecule-nlp",
+            entity="molecule-nlp-altegrad-23",
             name=output_directory.name,
             config=configuration
         )

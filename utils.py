@@ -34,7 +34,7 @@ def get_default_parser(help="Train models") -> argparse.Namespace:
                         choices=["cpu", "cuda"], default=str(get_device()), help="Training device")
     parser.add_argument("-e", "--exp-list", nargs="+", type=int, default=[1], help="List of experiments to run")
     parser.add_argument("-dbg", "--debug", action="store_true", help="Debug mode")
-    
+
     return parser
 
 
