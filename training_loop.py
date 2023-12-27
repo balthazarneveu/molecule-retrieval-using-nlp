@@ -21,6 +21,7 @@ from validation import eval
 import wandb
 import shutil
 
+
 def train(
         model, optimizer, count_iter, epoch, train_loader,
         max_count: Optional[int] = None,
@@ -97,7 +98,7 @@ def training(
     loss = 0
     all_losses = []
     count_iter = 0
-
+    best_accuracy = 0
     best_validation_loss = 1000000
     max_count = configuration[MAX_STEP_PER_EPOCH]
     last_checkpoint = []
@@ -109,6 +110,7 @@ def training(
         all_losses.extend(epoch_losses)
         val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count, score=True)
         best_validation_loss = min(best_validation_loss, val_loss)
+        best_accuracy = max(best_accuracy, lrap_score)
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
               f'Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e} | lrap_score: {lrap_score:.3e}')
         metrics_dict = {
@@ -128,7 +130,7 @@ def training(
             metric_files_list.append(backup_folder/metric_file_name)
         for metric_file_path in metric_files_list:
             Dump.save_json(metrics_dict, metric_file_path)
-        if best_validation_loss == val_loss:
+        if best_accuracy == lrap_score:
             print('validation loss improved saving checkpoint...')
             model_file_name = f'model_{epoch:04d}.pt'
             save_path = output_directory/model_file_name
