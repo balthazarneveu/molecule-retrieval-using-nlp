@@ -35,6 +35,8 @@ def train_experience(
             name=output_directory.name,
             config=configuration
         )
+    else:
+        logging.warning("Weights and biases disabled: logging into the blue!")
     output_directory.mkdir(exist_ok=True, parents=True)
     training(
         model, output_directory, configuration, tokenizer,
@@ -48,10 +50,17 @@ if __name__ == '__main__':
     parser = get_default_parser()
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
     parser.add_argument("-w", "--wandb-api-key", type=str, default=None, help="Wandb API key")
+    parser.add_argument("--no-wandb", action="store_false", help="Disable wandb")
     args = parser.parse_args()
-    if args.wandb_api_key is not None:
+    if not args.no_wandb and args.wandb_api_key is not None:
         wandb_login(args.wandb_api_key)
     for exp in args.exp_list:
-        train_experience(exp, debug=args.debug, backup_root=args.backup_root, device=args.device)
+        train_experience(
+            exp,
+            debug=args.debug,
+            backup_root=args.backup_root,
+            device=args.device,
+            wandb_flag=not args.no_wandb
+        )
         for phase in [VALIDATION, TEST]:
             evaluate_experience(exp, backup_root=args.backup_root, device=args.device, phase=phase)

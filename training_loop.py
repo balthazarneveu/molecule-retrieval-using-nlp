@@ -19,7 +19,7 @@ import logging
 from typing import Optional
 from validation import eval
 import wandb
-
+import shutil
 
 def train(
         model, optimizer, count_iter, epoch, train_loader,
@@ -76,6 +76,9 @@ def training(
 ):
     tensorboard_root.mkdir(exist_ok=True, parents=True)
     tensorboard_dir = tensorboard_root / output_directory.name
+    if backup_folder is not None:
+        backup_tensorboard_dir = backup_folder.parent / tensorboard_root.name / backup_folder.name
+        backup_tensorboard_dir.mkdir(exist_ok=True, parents=True)
     writer_tra = SummaryWriter(log_dir=tensorboard_dir/"train")
     writer_val = SummaryWriter(log_dir=tensorboard_dir/"val")
     gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
@@ -97,7 +100,7 @@ def training(
 
     best_validation_loss = 1000000
     max_count = configuration[MAX_STEP_PER_EPOCH]
-
+    last_checkpoint = []
     for epoch in range(nb_epochs):
         torch.cuda.empty_cache()
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
@@ -128,10 +131,16 @@ def training(
         if best_validation_loss == val_loss:
             print('validation loss improved saving checkpoint...')
             model_file_name = f'model_{epoch:04d}.pt'
-            save_path = os.path.join(output_directory, model_file_name)
+            save_path = output_directory/model_file_name
             save_path_list = [save_path]
             if backup_folder is not None:
                 save_path_list.append(os.path.join(backup_folder, model_file_name))
+                shutil.copytree(tensorboard_dir, backup_tensorboard_dir, dirs_exist_ok=True)
+            for last_check in last_checkpoint:
+                if Path(last_check).exists():
+                    logging.warning(f"Removing last checkpoint {last_check}")
+                    os.remove(last_check)
+            last_checkpoint = []
             for save_path in save_path_list:
                 torch.save({
                     'epoch': epoch,
@@ -141,6 +150,7 @@ def training(
                     'configuration': configuration,
                     'loss': loss,
                 }, save_path)
-            print('checkpoint saved to: {}'.format(save_path))
+                print('checkpoint saved to: {}'.format(save_path))
+                last_checkpoint.append(save_path)
     writer_tra.close()
     writer_val.close()
