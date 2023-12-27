@@ -8,7 +8,16 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
     - [Balthazar Neveu](https://github.com/balthazarneveu)
 - [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge)
 
-## Colab setup
+## Remote setup
+
+#### :key: Secrets
+Set secrets in Colab or Kaggle: 
+- `gitrepo` : `balthazarneveu/molecule-retrieval-using-nlp.git`
+- `uname_git`: github user name
+- `github_token`: github token to this repo
+- `wandb_api_key`: weights and biases API key
+
+#### :scroll: Notebook
 - Setup a drive folder named `molecules-nlp` where you can store results checkpoints
 - Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training.
 
