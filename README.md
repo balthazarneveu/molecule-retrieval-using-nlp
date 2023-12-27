@@ -9,9 +9,15 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
     - [Basile Terver](https://github.com/Basile-Terv)
     - [Lea Khalil](https://github.com/lea-khalil)
 
+
+
 -----
-- :medal_military: [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge)
-- :trophy: [Weights and biases](https://wandb.ai/molecule-nlp-altegrad-23)
+
+| ![](/report/figures/logo.png) |
+|:-----:|
+| :medal_military: [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge) |
+| :trophy: [Weights and biases](https://wandb.ai/molecule-nlp-altegrad-23) |
+
 ------
 # :gear: Setup
 Everything can be trained locally
