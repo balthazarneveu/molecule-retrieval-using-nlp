@@ -50,7 +50,7 @@ if __name__ == '__main__':
     parser = get_default_parser()
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
     parser.add_argument("-w", "--wandb-api-key", type=str, default=None, help="Wandb API key")
-    parser.add_argument("--no-wandb", action="store_false", help="Disable wandb")
+    parser.add_argument("--no-wandb", action="store_true", help="Disable wandb")
     args = parser.parse_args()
     if not args.no_wandb and args.wandb_api_key is not None:
         wandb_login(args.wandb_api_key)
