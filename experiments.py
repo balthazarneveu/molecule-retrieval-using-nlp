@@ -33,7 +33,7 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         get_exp = get_round_80_experience
     elif exp >= 9000 and exp <= 9999:
         get_exp = get_round_90_experience
-    model, configuration = get_exp(exp, configuration, root_dir, backup_root)
+    model, configuration = get_exp(exp, configuration, root_dir=root_dir, backup_root=backup_root)
     # Auto assign configuration values
     configuration[ID] = exp
     configuration[PLATFORM] = get_hardware_descriptor()

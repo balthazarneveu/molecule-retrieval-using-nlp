@@ -37,6 +37,7 @@ def evaluation(
     """
     csv_name = 'submission.csv' if phase == TEST else 'validation.csv'
     submission_csv_file = model_path/csv_name
+    submission_csv_file.parent.mkdir(exist_ok=True, parents=True)
     if submission_csv_file.exists():
         print(f"Experience {model_path} already evaluated")
         if not override:
@@ -44,12 +45,14 @@ def evaluation(
         else:
             logging.warning(f"Overriding results for experience {model_path}")
     batch_size = configuration[BATCH_SIZE][phase]
-    if configuration[PLATFORM]["gpu"]["Memory"]/(1024.**3) < 5.:
+    if configuration[PLATFORM]["gpu"].get("Memory", 0)/(1024.**3) < 5.:
         logging.warning("Tiny GPU!")
         batch_size = min(batch_size, 8)
     print('loading best model...')
     best_model_path = sorted(list(model_path.glob("*.pt")))
-    assert len(best_model_path) > 0, "No model checkpoint found at {model_path}"
+    if len(best_model_path) == 0:
+        best_model_path = sorted(list(backup_folder.glob("*.pt")))
+    assert len(best_model_path) > 0, f"No model checkpoint found at {model_path}"
     best_model_path = best_model_path[-1]
     checkpoint = torch.load(best_model_path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
