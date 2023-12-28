@@ -5,6 +5,8 @@ from properties import (
 import torch
 from experiments_round_00 import get_baseline_experience
 from experiments_round_01 import get_round_1_experience
+from experiments_round_80 import get_round_80_experience
+from experiments_round_90 import get_round_90_experience
 from typing import Tuple
 from platform_description import get_hardware_descriptor, get_git_sha1
 from pathlib import Path
@@ -25,8 +27,12 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
     # Manual configurations
     if exp >= 0 and exp <= 99:
         get_exp = get_baseline_experience
-    elif exp >= 100:
+    elif exp >= 100 and exp<=200:
         get_exp = get_round_1_experience
+    elif exp >= 8000 and exp <= 8999:
+        get_exp = get_round_80_experience
+    elif exp >= 9000 and exp <= 9999:
+        get_exp = get_round_90_experience
     model, configuration = get_exp(exp, configuration, root_dir, backup_root)
     # Auto assign configuration values
     configuration[ID] = exp
