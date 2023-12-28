@@ -44,8 +44,8 @@ def evaluation(
         else:
             logging.warning(f"Overriding results for experience {model_path}")
     batch_size = configuration[BATCH_SIZE][phase]
-    if configuration[PLATFORM]["gpu"]["Memory"]/(1024.**3) < 5.:
-        logging.warning("Tiny GPU!")
+    if configuration[PLATFORM]["gpu"].get("Memory", 0)/(1024.**3) < 5.:
+        logging.warning("Tiny GPU! Or CPU")
         batch_size = min(batch_size, 8)
     print('loading best model...')
     best_model_path = sorted(list(model_path.glob("*.pt")))
