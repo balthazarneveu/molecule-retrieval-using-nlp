@@ -17,6 +17,12 @@ class MultimodalModel(GenericModel):
         print(f"Text: {self.text_encoder.count_params()*1E-6:.1f}M")
         return super().count_params()
 
+    def get_text_encoder(self):
+        return self.text_encoder
+
+    def get_graph_encoder(self):
+        return self.graph_encoder
+
 
 if __name__ == "__main__":
     from language_model import TextEncoder
