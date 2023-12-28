@@ -27,7 +27,7 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
     # Manual configurations
     if exp >= 0 and exp <= 99:
         get_exp = get_baseline_experience
-    elif exp >= 100 and exp<=200:
+    elif exp >= 100 and exp <= 200:
         get_exp = get_round_1_experience
     elif exp >= 8000 and exp <= 8999:
         get_exp = get_round_80_experience

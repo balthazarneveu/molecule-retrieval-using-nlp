@@ -1,4 +1,5 @@
 from generic import GenericModel
+import time
 
 
 class MultimodalModel(GenericModel):
@@ -8,8 +9,18 @@ class MultimodalModel(GenericModel):
         self.text_encoder = text_encoder
 
     def forward(self, graph_batch, input_ids, attention_mask):
+        # Time profiling for graph_encoder
+        start_time = time.time()
         graph_encoded = self.graph_encoder(graph_batch)
+        graph_time = time.time() - start_time
+        print(f"Graph encoding time: {graph_time:.4f} seconds")
+
+        # Time profiling for text_encoder
+        start_time = time.time()
+        print(input_ids.shape)
         text_encoded = self.text_encoder(input_ids, attention_mask)
+        text_time = time.time() - start_time
+        print(f"Text encoding time: {text_time:.4f} seconds")
         return graph_encoded, text_encoded
 
     def count_params(self):
