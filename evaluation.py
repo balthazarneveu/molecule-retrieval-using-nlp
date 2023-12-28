@@ -1,7 +1,8 @@
 from properties import (
     BATCH_SIZE,
     TEST, VALIDATION, DATA_DIR, PLATFORM,
-    ROOT_DIR
+    ROOT_DIR,
+    TOKENIZER_NAME
 )
 from torch_geometric.data import DataLoader
 from dataloader import GraphDataset, TextDataset
@@ -88,7 +89,8 @@ def evaluation(
             solution.to_csv(backup_folder/csv_name, index=False)
     elif phase == VALIDATION:
         gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
-        val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer)
+        val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer,
+                                       specific_name=configuration[TOKENIZER_NAME])
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
         val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True)
         print(lrap_score)

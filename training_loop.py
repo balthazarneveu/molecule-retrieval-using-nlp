@@ -1,6 +1,7 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, OPTIMIZER,
-    TRAIN, VALIDATION, DATA_DIR, MAX_STEP_PER_EPOCH, ROOT_DIR
+    TRAIN, VALIDATION, DATA_DIR, MAX_STEP_PER_EPOCH, ROOT_DIR,
+    TOKENIZER_NAME
 )
 from data_dumps import Dump
 from torch_geometric.data import DataLoader
@@ -86,9 +87,11 @@ def training(
 
     nb_epochs = configuration[NB_EPOCHS]
     batch_size = configuration[BATCH_SIZE]
-    val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer)
+    val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer,
+                                   specific_name=configuration[TOKENIZER_NAME])
     val_loader = DataLoader(val_dataset, batch_size=batch_size[VALIDATION], shuffle=True)
-    train_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=TRAIN, tokenizer=tokenizer)
+    train_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=TRAIN, tokenizer=tokenizer,
+                                     specific_name=configuration[TOKENIZER_NAME])
     train_loader = DataLoader(train_dataset, batch_size=batch_size[TRAIN], shuffle=True)
     model.to(device)
 
