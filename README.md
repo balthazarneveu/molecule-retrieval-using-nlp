@@ -35,7 +35,7 @@ Set secrets in Colab or Kaggle:
 - `github_token`: github token to this repo
 - `wandb_api_key`: weights and biases API key
 - `kaggle_uname`: https://www.kaggle.com/settings/account > Create new token
-- `kaggle_token`: same as abov
+- `kaggle_token`: same as above
 
 #### :scroll: Notebook
 - Setup a drive folder named `molecules-nlp` where you can store results checkpoints
