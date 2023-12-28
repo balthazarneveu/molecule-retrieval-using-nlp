@@ -8,7 +8,8 @@ import pandas as pd
 
 
 class GraphTextDataset(Dataset):
-    def __init__(self, root, gt, split, tokenizer=None, transform=None, pre_transform=None):
+    def __init__(self, root, gt, split, tokenizer=None, transform=None, pre_transform=None, specific_name=""):
+        self.specific_name = specific_name
         self.root = root
         self.gt = gt
         self.split = split
@@ -38,7 +39,7 @@ class GraphTextDataset(Dataset):
 
     @property
     def processed_dir(self) -> str:
-        return osp.join(self.root, 'processed/', self.split)
+        return osp.join(self.root, f'processed{self.specific_name}/', self.split)
 
     def download(self):
         pass
