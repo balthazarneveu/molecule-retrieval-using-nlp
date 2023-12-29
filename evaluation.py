@@ -103,7 +103,7 @@ def evaluation(
             tokenizer=tokenizer,
             specific_name=configuration[TOKENIZER_NAME])
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True)
+        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True, desc=phase)
         print(f"LRAP score {phase} : {lrap_score:.3%}")
     return submission_csv_file
 
