@@ -51,6 +51,7 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
     parser.add_argument("-w", "--wandb-api-key", type=str, default=None, help="Wandb API key")
     parser.add_argument("--no-wandb", action="store_true", help="Disable wandb")
+    parser.add_argument("--no-eval", action="store_true", help="Disable final evaluation")
     args = parser.parse_args()
     if not args.no_wandb and args.wandb_api_key is not None:
         wandb_login(args.wandb_api_key)
@@ -62,5 +63,6 @@ if __name__ == '__main__':
             device=args.device,
             wandb_flag=not args.no_wandb
         )
-        for phase in [VALIDATION, TEST]:
-            evaluate_experience(exp, backup_root=args.backup_root, device=args.device, phase=phase)
+        if not args.no_eval:
+            for phase in [VALIDATION, TEST]:
+                evaluate_experience(exp, backup_root=args.backup_root, device=args.device, phase=phase)
