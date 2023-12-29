@@ -6,13 +6,13 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def eval(model, val_loader, device='cuda', max_count: Optional[int] = None, score: bool = False):
+def eval(model, val_loader, device='cuda', max_count: Optional[int] = None, score: bool = False, desc="Validation"):
     lrap_score = None
     model.eval()
     val_loss = 0
     text_embeddings = []
     graph_embeddings = []
-    for batch_idx, batch in tqdm(enumerate(val_loader), total=len(val_loader), desc="Validation"):
+    for batch_idx, batch in tqdm(enumerate(val_loader), total=len(val_loader), desc=desc):
         if max_count is not None and batch_idx > max_count:
             continue
 
