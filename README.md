@@ -59,7 +59,8 @@ kaggle_users = {
 
 Run `python remote_training.py -u user1 -e X`
 This will create a dedicated folder for training a specific experiment with a dedicated notebook.
-`--push` will push the notebook.
+- use **`-p`** (`--push`) will upload/push the notebook and run it.
+- use **`-d`** (`--download`) to download the training results and save it to disk)
 Please note that the first time, you'll need to manually edit the notebook under kaggle web page to allow secrets.
 
 
