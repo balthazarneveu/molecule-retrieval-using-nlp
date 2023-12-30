@@ -34,24 +34,35 @@ def prepare_notebook(
 
 
 def main(argv):
+    nb_id = "train-molecule-nlp"
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--user", type=str, help="Kaggle user", choices=list(kaggle_users.keys()))
     parser.add_argument("-e", "--exp", type=int, required=True, help="Experiment id")
     parser.add_argument("--branch", type=str, help="Git branch name", default=get_git_branch_name())
     parser.add_argument("-p", "--push", action="store_true", help="Push")
+    parser.add_argument("-d", "--download", action="store_true", help="Download results")
     args = parser.parse_args(argv)
+    exp = args.exp
     kaggle_user = kaggle_users[args.user]
     uname_kaggle = kaggle_user["username"]
     kaggle.api._load_config(kaggle_user)
+    if args.download:
+        tmp_dir = Path(f"__tmp_{exp:04d}")
+        kaggle.api.kernels_output_cli(f"{kaggle_user['username']}/{nb_id}", path=tmp_dir)
+        subprocess.run(["tar", "-xzf", tmp_dir/"output.tgz", "__output"])
+        import shutil
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return
     kernel_root = Path(f"__nb_{uname_kaggle}")
     kernel_root.mkdir(exist_ok=True, parents=True)
-    exp = args.exp
+    
     kernel_path = kernel_root/f"{exp:04d}"
     kernel_path.mkdir(exist_ok=True, parents=True)
     branch = args.branch
     print(branch)
 
-    nb_id = "train-molecule-nlp"
+    
     config = {
         "id": f"{kaggle_user['username']}/{nb_id}",
         # "id_no" : 3,
