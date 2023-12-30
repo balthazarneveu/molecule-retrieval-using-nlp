@@ -29,11 +29,12 @@ def train_experience(
         logging.warning(f"Experience {exp} already trained")
         return
     if wandb_flag:
-        wandb.init(
+        run = wandb.init(
             project="molecule-nlp",
             entity="molecule-nlp-altegrad-23",
             name=output_directory.name,
-            config=configuration
+            config=configuration,
+            reinit=True
         )
     else:
         logging.warning("Weights and biases disabled: logging into the blue!")
@@ -44,6 +45,8 @@ def train_experience(
         backup_folder=backup_folder,
         wandb_flag=wandb_flag
     )
+    if wandb_flag:
+        run.finish()
 
 
 if __name__ == '__main__':
