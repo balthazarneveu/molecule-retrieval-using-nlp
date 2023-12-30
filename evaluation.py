@@ -1,6 +1,6 @@
 from properties import (
     BATCH_SIZE,
-    TEST, VALIDATION, DATA_DIR, PLATFORM,
+    TRAIN, TEST, VALIDATION, DATA_DIR, PLATFORM,
     ROOT_DIR,
     TOKENIZER_NAME
 )
@@ -35,7 +35,11 @@ def evaluation(
         device (str): cpu or cuda
         backup_folder (Path, optional): Backup for Collab. Defaults to None.
     """
-    csv_name = 'submission.csv' if phase == TEST else 'validation.csv'
+    csv_name = {
+        TEST: 'submission.csv',
+        VALIDATION: 'validation.csv',
+        TRAIN: 'training.csv'
+    }[phase]
     submission_csv_file = model_path/csv_name
     submission_csv_file.parent.mkdir(exist_ok=True, parents=True)
     if submission_csv_file.exists():
@@ -90,13 +94,17 @@ def evaluation(
         solution.to_csv(submission_csv_file, index=False)
         if backup_folder is not None:
             solution.to_csv(backup_folder/csv_name, index=False)
-    elif phase == VALIDATION:
+    elif phase == VALIDATION or phase == TRAIN:
         gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
-        val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer,
-                                       specific_name=configuration[TOKENIZER_NAME])
+        val_dataset = GraphTextDataset(
+            root=DATA_DIR,
+            gt=gt,
+            split={VALIDATION: 'val', TRAIN: 'train'}[phase],
+            tokenizer=tokenizer,
+            specific_name=configuration[TOKENIZER_NAME])
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True)
-        print(lrap_score)
+        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True, desc=phase)
+        print(f"LRAP score {phase} : {lrap_score:.3%}")
     return submission_csv_file
 
 
@@ -129,9 +137,16 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
     parser.add_argument("-force", "--force", action="store_true", help="Override results")
     parser.add_argument("-v", "--validation", action="store_true", help="Evaluate on validation set")
+    parser.add_argument("-t", "--training", action="store_true", help="Evaluate on training set")
     args = parser.parse_args()
+    if args.training:
+        phase = TRAIN
+    elif args.validation:
+        phase = VALIDATION
+    else:
+        phase = TEST
     for exp in args.exp_list:
         evaluate_experience(
             exp, backup_root=args.backup_root, device=args.device, override=args.force,
-            phase=TEST if not args.validation else VALIDATION
+            phase=phase
         )

@@ -115,7 +115,8 @@ def training(
         best_validation_loss = min(best_validation_loss, val_loss)
         best_accuracy = max(best_accuracy, lrap_score)
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
-              f'Validation loss:  {val_loss:.3e} - BEST : {best_validation_loss:.3e} | lrap_score: {lrap_score:.3e}')
+              f'LRAP {lrap_score:.3%} | best {best_accuracy:.3%}')
+        print(f"Validation loss:  {val_loss:.3e} - best : {best_validation_loss:.3e}")
         metrics_dict = {
             'epoch': epoch,
             'validation_loss': val_loss,

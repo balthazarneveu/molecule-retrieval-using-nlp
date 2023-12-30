@@ -37,6 +37,33 @@ Set secrets in Colab or Kaggle:
 - `kaggle_uname`: https://www.kaggle.com/settings/account > Create new token
 - `kaggle_token`: same as above
 
+
+#### :rocket: Kaggle
+
+:warning: Phone needs to be confirmed to acess GPU and have internet acess on Kaggle
+
+
+Create a [__kaggle_logins.py](/__kaggle_login.py) file.
+```python
+kaggle_users = {
+    "user1": {
+        "username": "user1_kaggle_name",
+        "key": "user1_kaggle_key"
+    },
+    "user2": {
+        "username": "user2_kaggle_name",
+        "key": "user2_kaggle_key"
+    },
+}
+```
+
+Run `python remote_training.py -u user1 -e X`
+This will create a dedicated folder for training a specific experiment with a dedicated notebook.
+- use **`-p`** (`--push`) will upload/push the notebook and run it.
+- use **`-d`** (`--download`) to download the training results and save it to disk)
+Please note that the first time, you'll need to manually edit the notebook under kaggle web page to allow secrets.
+
+
 #### :scroll: Notebook
 - Setup a drive folder named `molecules-nlp` where you can store results checkpoints
 - Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training, ready for Colab & Kaggle.

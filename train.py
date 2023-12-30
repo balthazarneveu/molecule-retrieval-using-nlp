@@ -31,11 +31,12 @@ def train_experience(
         if not override:
             return
     if wandb_flag:
-        wandb.init(
+        run = wandb.init(
             project="molecule-nlp",
             entity="molecule-nlp-altegrad-23",
             name=output_directory.name,
-            config=configuration
+            config=configuration,
+            reinit=True
         )
     else:
         logging.warning("Weights and biases disabled: logging into the blue!")
@@ -46,6 +47,8 @@ def train_experience(
         backup_folder=backup_folder,
         wandb_flag=wandb_flag
     )
+    if wandb_flag:
+        run.finish()
 
 
 if __name__ == '__main__':
@@ -54,6 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--wandb-api-key", type=str, default=None, help="Wandb API key")
     parser.add_argument("--no-wandb", action="store_true", help="Disable wandb")
     parser.add_argument("-force", "--force", action="store_true", help="Override results")
+    parser.add_argument("--no-eval", action="store_true", help="Disable final evaluation")
     args = parser.parse_args()
     if not args.no_wandb and args.wandb_api_key is not None:
         wandb_login(args.wandb_api_key)
@@ -66,5 +70,6 @@ if __name__ == '__main__':
             wandb_flag=not args.no_wandb,
             override=args.force
         )
-        for phase in [VALIDATION, TEST]:
-            evaluate_experience(exp, backup_root=args.backup_root, device=args.device, phase=phase, override=args.force)
+        if not args.no_eval:
+            for phase in [VALIDATION, TEST]:
+                evaluate_experience(exp, backup_root=args.backup_root, device=args.device, phase=phase,override=args.force)
