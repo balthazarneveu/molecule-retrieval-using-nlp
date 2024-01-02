@@ -5,6 +5,7 @@ from properties import (
 import torch
 from experiments_round_00 import get_baseline_experience
 from experiments_round_01 import get_round_1_experience
+from experiments_round_02 import get_round_2_experience
 from experiments_round_80 import get_round_80_experience
 from experiments_round_90 import get_round_90_experience
 from typing import Tuple
@@ -13,6 +14,10 @@ from pathlib import Path
 
 
 def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) -> Tuple[torch.nn.Module, dict]:
+    """
+    Full definition of experiments roadmap
+    https://github.com/balthazarneveu/molecule-retrieval-using-nlp/issues
+    """
     configuration = {
         NB_EPOCHS: 5,
         BATCH_SIZE: [16, 8, 8],  # To fit Nvidia T500 4Gb RAM
@@ -24,11 +29,14 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         TOKENIZER_NAME: 'distilbert-base-uncased',
         MAX_STEP_PER_EPOCH: None
     }
+
     # Manual configurations
     if exp >= 0 and exp <= 99:
         get_exp = get_baseline_experience
-    elif exp >= 100 and exp<=200:
+    elif exp >= 100 and exp <= 199:
         get_exp = get_round_1_experience
+    elif exp >= 200 and exp <= 299:
+        get_exp = get_round_2_experience
     elif exp >= 8000 and exp <= 8999:
         get_exp = get_round_80_experience
     elif exp >= 9000 and exp <= 9999:

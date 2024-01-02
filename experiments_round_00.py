@@ -8,6 +8,10 @@ from baseline_model import Model as BaselineModel
 
 
 def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None, backup_root: Path = None):
+    """
+    Baseline = trainable BERT + base GCN
+    https://github.com/balthazarneveu/molecule-retrieval-using-nlp/issues/12
+    """
     assert exp >= 0 and exp <= 99, "baseline exp must be <= 99"
     if exp == 0:
         configuration[NAME] = 'check-pipeline-BERT-GCN'
