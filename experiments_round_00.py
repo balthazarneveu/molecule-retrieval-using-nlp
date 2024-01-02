@@ -255,6 +255,13 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 WEIGHT_DECAY: 0.5,
             }
             batch_size = 32  # suitable for RTX 2060
+        if exp == 65:
+            configuration[NB_EPOCHS] = 70
+            batch_size = 64
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 7e-6,
+                WEIGHT_DECAY: 0.3,
+            }
         if batch_size_val is None:
             batch_size_val = batch_size
         configuration[BATCH_SIZE] = (batch_size, batch_size_val, batch_size_val)
