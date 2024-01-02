@@ -19,7 +19,7 @@ def train_experience(
         print_freq = 5
     else:
         print_freq = 50
-    model, configuration, output_directory, tokenizer, device, backup_folder = prepare_experience(
+    model, configuration, output_directory, tokenizer, device, backup_folder, optimizer_state_dict = prepare_experience(
         exp,
         root_dir=root_dir, device=device,
         backup_root=backup_root
@@ -42,6 +42,7 @@ def train_experience(
     training(
         model, output_directory, configuration, tokenizer,
         device, print_freq=print_freq,
+        optimizer_state_dict=optimizer_state_dict,
         backup_folder=backup_folder,
         wandb_flag=wandb_flag
     )
