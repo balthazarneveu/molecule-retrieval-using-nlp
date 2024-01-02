@@ -24,8 +24,8 @@ def plot_metrics(results: dict, ylim=[]) -> None:
                  label=f"{res['name']} train loss")
         plt.plot(res["epochs"][1:], res["val_losses"], "-o", color=color,
                  label=f"{res['name']} valid loss")
-    if len(ylim) >=1:
-        plt.ylim(ylim[0], None if len(ylim)==1 else ylim[1])
+    if len(ylim) >= 1:
+        plt.ylim(ylim[0], None if len(ylim) == 1 else ylim[1])
     plt.legend()
     plt.grid()
     plt.show()
@@ -48,7 +48,7 @@ def get_results(output_directories: Path, configuration_list: dict = None) -> di
             configuration = configuration_list[exp_idx]
         name = ""
         for key in [ID, NAME, ANNOTATIONS]:
-            name += f"{configuration[key]} "
+            name += f"{configuration.get(key, '')} "
         results[configuration[ID]] = {
             "name": name,
             "epochs": epochs,
@@ -111,7 +111,7 @@ def get_table(results: dict, kaggle_results={},
             res["configuration"].get(MODEL_SIZE, 0)*1E-6,
             res["configuration"].get(BATCH_SIZE, {TRAIN: "N/A"})[TRAIN],
             format_hyper_params(res["configuration"]["optimizer"]),
-            "\n".join(res["configuration"][ANNOTATIONS].split(" - ")),
+            "\n".join(res["configuration"].get(ANNOTATIONS, "").split(" - ")),
 
         ])
     table.add_rows([
@@ -123,6 +123,7 @@ def get_table(results: dict, kaggle_results={},
         table,
         caption=caption,
         label=f"table:{table_label.replace(' ', '_')}"))
+
 
 def main(argv):
     parser = get_default_parser(help="Plot metrics")
@@ -139,6 +140,7 @@ def main(argv):
         get_table(results, kaggle_results=kaggle_results)
     if args.plot:
         plot_metrics(results, ylim=args.ylim)
+
 
 if __name__ == '__main__':
     import sys
