@@ -45,7 +45,7 @@ def wandb_login(wandb_api_key: Optional[str] = None):
 def prepare_experience(
         exp: int, root_dir: Path = ROOT_DIR, device=None, backup_root: Path = None
 ) -> Tuple[torch.nn.Module, dict, Path, AutoTokenizer, torch.device, Path]:
-    model, configuration = get_experience(exp, root_dir=root_dir, backup_root=backup_root)
+    model, configuration, optimizer_state_dict = get_experience(exp, root_dir=root_dir, backup_root=backup_root)
     output_directory = get_output_directory(configuration, root_dir=root_dir)
     tokenizer = get_tokenizer(configuration)
     if device is None:
@@ -55,4 +55,4 @@ def prepare_experience(
     if backup_root is not None:
         backup_folder = backup_root/output_directory.name
         backup_folder.mkdir(exist_ok=True, parents=True)
-    return model, configuration, output_directory, tokenizer, device, backup_folder
+    return model, configuration, output_directory, tokenizer, device, backup_folder, optimizer_state_dict

@@ -123,7 +123,7 @@ def evaluate_experience(
     forced_batch_size: int = None,
     phase=TEST
 ) -> None:
-    model, configuration, output_directory, tokenizer, device, backup_folder = prepare_experience(
+    model, configuration, output_directory, tokenizer, device, backup_folder, _optimizer_state_dict = prepare_experience(
         exp,
         root_dir=root_dir,
         device=device,
