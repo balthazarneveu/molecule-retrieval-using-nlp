@@ -2,6 +2,7 @@ from pathlib import Path
 NB_EPOCHS = "nb_epochs"
 BATCH_SIZE = "batch_size"
 MODEL_SIZE = "model_size"
+OPTIMIZER_STATE_DICT = "optimizer_state_dict"
 LEARNING_RATE = "lr"
 TOKENIZER_NAME = "tokenizer_model_name"
 NAME = "name"
