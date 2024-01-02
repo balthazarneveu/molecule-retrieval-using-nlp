@@ -224,7 +224,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 BETAS: [0.9, 0.999]  # Default ADAM parameters
         }
         if exp == 60:
-            batch_size = 96  # 128 Does not work even on Kaggle.
+            batch_size = 64  # 96 or 128 Does not work even on Kaggle.
         if exp == 61:
             configuration[OPTIMIZER] = {
                 LEARNING_RATE: 2e-6,
