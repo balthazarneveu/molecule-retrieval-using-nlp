@@ -4,7 +4,8 @@ import wandb
 
 from training_loop import training
 from evaluation import evaluate_experience
-from utils import prepare_experience, get_default_parser, wandb_login
+from utils import get_default_parser, wandb_login
+from experiments import prepare_experience
 from pathlib import Path
 
 
