@@ -1,6 +1,7 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, WEIGHT_DECAY, BETAS, OPTIMIZER,
-    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, PLATFORM, MODEL_SIZE, SHA1, OPTIMIZER_STATE_DICT
+    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, PLATFORM, MODEL_SIZE, SHA1, OPTIMIZER_STATE_DICT,
+    ROOT_DIR
 )
 import torch
 from experiments_round_00 import get_baseline_experience
@@ -11,6 +12,7 @@ from experiments_round_90 import get_round_90_experience
 from typing import Tuple
 from platform_description import get_hardware_descriptor, get_git_sha1
 from pathlib import Path
+from utils import get_device, get_tokenizer, get_output_directory
 
 
 def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) -> Tuple[torch.nn.Module, dict]:
@@ -53,13 +55,30 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         TEST: configuration[BATCH_SIZE][2]
     }
     configuration[SHA1] = get_git_sha1()
-    optimizer_state_dict = configuration[OPTIMIZER].get(OPTIMIZER_STATE_DICT)
+    optimizer_state_dict = configuration[OPTIMIZER].get(OPTIMIZER_STATE_DICT, None)
     if optimizer_state_dict is not None:
         configuration["optimizer_initial_state_dict"] = "reloaded"
     else:
         configuration["optimizer_initial_state_dict"] = "empty"
-    configuration[OPTIMIZER].pop(OPTIMIZER_STATE_DICT)  # to avoid writing it in the configuation file
+    if OPTIMIZER_STATE_DICT in configuration[OPTIMIZER]:
+        configuration[OPTIMIZER].pop(OPTIMIZER_STATE_DICT)  # to avoid writing it in the configuation file
     return model, configuration, optimizer_state_dict
+
+
+def prepare_experience(
+        exp: int, root_dir: Path = ROOT_DIR, device=None, backup_root: Path = None
+) -> Tuple[torch.nn.Module, dict, Path, any, torch.device, Path]:
+    model, configuration, optimizer_state_dict = get_experience(exp, root_dir=root_dir, backup_root=backup_root)
+    output_directory = get_output_directory(configuration, root_dir=root_dir)
+    tokenizer = get_tokenizer(configuration)
+    if device is None:
+        device = get_device()
+        print(f"Device not specified, using default one {device}")
+    backup_folder = None
+    if backup_root is not None:
+        backup_folder = backup_root/output_directory.name
+        backup_folder.mkdir(exist_ok=True, parents=True)
+    return model, configuration, output_directory, tokenizer, device, backup_folder, optimizer_state_dict
 
 
 if __name__ == "__main__":

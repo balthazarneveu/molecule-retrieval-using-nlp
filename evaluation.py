@@ -14,7 +14,8 @@ from torch.utils.data import DataLoader as TorchDataLoader
 from validation import eval
 from dataloader import GraphTextDataset
 import pandas as pd
-from utils import get_default_parser, prepare_experience
+from utils import get_default_parser
+from experiments import prepare_experience
 from platform_description import get_git_sha1
 from tqdm import tqdm
 import logging
