@@ -8,6 +8,7 @@ from graph_model import BasicGraphEncoder
 
 
 def get_round_1_experience(exp: int, configuration: dict, root_dir: Path = None, backup_root: Path = None):
+    """Freeze BERT and train adapter + base GCN"""
     if exp == 100:
         configuration[BATCH_SIZE] = (32, 32, 32)
         configuration[NB_EPOCHS] = 60
