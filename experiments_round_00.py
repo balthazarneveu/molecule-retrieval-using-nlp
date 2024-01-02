@@ -172,4 +172,16 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
         model.load_state_dict(
             torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
+    if exp == 16:
+        configuration[BATCH_SIZE] = (64, 64, 64)    # Kaggle
+        configuration[NB_EPOCHS] = 60
+        configuration[OPTIMIZER][LEARNING_RATE] = 2e-6
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers'
+        model = BaselineModel(
+            model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+            nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
+        model.load_state_dict(
+            torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
     return model, configuration
