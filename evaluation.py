@@ -23,7 +23,8 @@ import logging
 def evaluation(
     model: torch.nn.Module, model_path: Path, configuration: dict, tokenizer, device: str,
     backup_folder: Path = None, override: bool = False,
-    phase: str = TEST
+    phase: str = TEST,
+    forced_batch_size: int = None
 ):
     """Prepare results on a test set to be submitted to the Kaggle competition
 
@@ -53,6 +54,8 @@ def evaluation(
         logging.warning("Tiny GPU!")
         batch_size = min(batch_size, 8)
     print('loading best model...')
+    if forced_batch_size is not None:
+        batch_size = forced_batch_size
     best_model_path = sorted(list(model_path.glob("*.pt")))
     if len(best_model_path) == 0:
         best_model_path = sorted(list(backup_folder.glob("*.pt")))
@@ -103,7 +106,11 @@ def evaluation(
             tokenizer=tokenizer,
             specific_name=configuration[TOKENIZER_NAME])
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=None, score=True, desc=phase)
+        val_loss, lrap_score = eval(
+            model, val_loader,
+            device=device, score=True,
+            desc=phase, max_count=int(np.ceil(3302/batch_size)) if phase == TRAIN else None
+        )
         print(f"LRAP score {phase} : {lrap_score:.3%}")
     return submission_csv_file
 
@@ -113,6 +120,7 @@ def evaluate_experience(
     root_dir: Path = ROOT_DIR, backup_root: Path = None,
     override: bool = False,
     device=None,
+    forced_batch_size: int = None,
     phase=TEST
 ) -> None:
     model, configuration, output_directory, tokenizer, device, backup_folder = prepare_experience(
@@ -124,7 +132,8 @@ def evaluate_experience(
     submission_csv_file = evaluation(
         model, output_directory, configuration, tokenizer, device, backup_folder=backup_folder,
         override=override,
-        phase=phase
+        phase=phase,
+        forced_batch_size=forced_batch_size
     )
     sha1 = get_git_sha1()
     message = f"exp_{exp} sha1: {sha1} config: {configuration}"
@@ -138,6 +147,7 @@ if __name__ == '__main__':
     parser.add_argument("-force", "--force", action="store_true", help="Override results")
     parser.add_argument("-v", "--validation", action="store_true", help="Evaluate on validation set")
     parser.add_argument("-t", "--training", action="store_true", help="Evaluate on training set")
+    parser.add_argument("--batch-size", default=None, type=int, help="Forced batch size")
     args = parser.parse_args()
     if args.training:
         phase = TRAIN
@@ -148,5 +158,6 @@ if __name__ == '__main__':
     for exp in args.exp_list:
         evaluate_experience(
             exp, backup_root=args.backup_root, device=args.device, override=args.force,
-            phase=phase
+            phase=phase,
+            forced_batch_size=args.batch_size
         )

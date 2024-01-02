@@ -14,7 +14,7 @@ def eval(model, val_loader, device='cuda', max_count: Optional[int] = None, scor
     graph_embeddings = []
     for batch_idx, batch in tqdm(enumerate(val_loader), total=len(val_loader), desc=desc):
         if max_count is not None and batch_idx > max_count:
-            continue
+            break
 
         input_ids = batch.input_ids
         batch.pop('input_ids')
