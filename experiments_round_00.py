@@ -182,6 +182,4 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         model = BaselineModel(
             model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
             nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
-        model.load_state_dict(
-            torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
     return model, configuration
