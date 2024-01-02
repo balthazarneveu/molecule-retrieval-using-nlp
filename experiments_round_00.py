@@ -213,14 +213,20 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
             1e-9, 1e-8, 1e-7, 1e-6, 2e-6][delta_index]
         configuration[OPTIMIZER].pop(BETAS)
         configuration[OPTIMIZER][WEIGHT_DECAY] = 0.
-    if exp == 60:
-        configuration[OPTIMIZER] = {
-            LEARNING_RATE: 2e-6,
-            WEIGHT_DECAY: 0.3,
-            BETAS: [0.9, 0.999]  # Default ADAM parameters
-        }
+    if exp >= 60:
+        configuration[NAME] = 'Base-' + 'HP-search'
+        model = BaselineModel(model_name=configuration[TOKENIZER_NAME], num_node_features=300,
+                              nout=768, nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
         configuration[NB_EPOCHS] = 120
-        batch_size = 128
+        configuration[OPTIMIZER] = {
+                LEARNING_RATE: 2e-6,
+                WEIGHT_DECAY: 0.3,
+                BETAS: [0.9, 0.999]  # Default ADAM parameters
+        }
+        if exp == 60:
+            batch_size = 128
+        if exp == 61:
+            batch_size = 64  # suitable for RTX 2060
         configuration[BATCH_SIZE] = (batch_size, batch_size, batch_size)
     return model, configuration
 
