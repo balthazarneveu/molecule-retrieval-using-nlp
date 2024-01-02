@@ -1,6 +1,6 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, OPTIMIZER,
-    MAX_STEP_PER_EPOCH
+    MAX_STEP_PER_EPOCH, BETAS
 )
 from pathlib import Path
 import torch
@@ -194,7 +194,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
             nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
     if exp >= 30:
         model, configuration = get_best_pretrained_model(configuration, root_dir, backup_root)
-        configuration[NB_EPOCHS] = 10
+        configuration[NB_EPOCHS] = 16
         if exp >= 30 and exp < 40:
             milestone_index = 30
             configuration[BATCH_SIZE] = (8, 8, 8)    # T500
@@ -207,6 +207,8 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         delta_index = exp - milestone_index
         configuration[OPTIMIZER][LEARNING_RATE] = [
             1e-9, 1e-8, 1e-7, 1e-6, 2e-6][delta_index]
+        configuration[OPTIMIZER].pop(BETAS)
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.
     return model, configuration
 
 
