@@ -192,4 +192,41 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         model = BaselineModel(
             model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
             nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
+    if exp >= 30:
+        model, configuration = get_best_pretrained_model(configuration, root_dir, backup_root)
+        configuration[NB_EPOCHS] = 10
+        if exp >= 30 and exp < 40:
+            milestone_index = 30
+            configuration[BATCH_SIZE] = (8, 8, 8)    # T500
+        elif exp >= 40 and exp < 50:
+            milestone_index = 40
+            configuration[BATCH_SIZE] = (16, 16, 16)    # T500
+        elif exp >= 50:
+            milestone_index = 50
+            configuration[BATCH_SIZE] = (32, 32, 32)    # RTX2060
+        delta_index = exp - milestone_index
+        configuration[OPTIMIZER][LEARNING_RATE] = [
+            1e-9, 1e-8, 1e-7, 1e-6, 2e-6][delta_index]
+    return model, configuration
+
+
+def get_best_pretrained_model(configuration, root_dir: Path = None, backup_root: Path = None):
+    configuration[BATCH_SIZE] = (32, 32, 32)    # T500
+    configuration[NB_EPOCHS] = 60
+    configuration[OPTIMIZER][LEARNING_RATE] = 2e-6
+    configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
+    configuration[NAME] = 'Base-' + 'HP-search'
+    configuration[ANNOTATIONS] = 'Baseline - provided by organizers - resume 15'
+    model = BaselineModel(
+        model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+        nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
+    if backup_root is not None:
+        pretrained_model_path = backup_root/'0015_Baseline-BERT-GCN/model_0039.pt'
+    elif root_dir is not None:
+        pretrained_model_path = root_dir/'__output'/'0015_Baseline-BERT-GCN/model_0039.pt'
+    else:
+        raise ValueError("No root_dir or backup_root provided")
+    assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
+    model.load_state_dict(
+        torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
     return model, configuration
