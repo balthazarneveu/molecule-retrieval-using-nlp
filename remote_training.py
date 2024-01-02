@@ -5,6 +5,7 @@ from __kaggle_login import kaggle_users
 import argparse
 import sys
 import subprocess
+from properties import ROOT_DIR
 
 
 def get_git_branch_name():
@@ -48,24 +49,22 @@ def main(argv):
     uname_kaggle = kaggle_user["username"]
     kaggle.api._load_config(kaggle_user)
     if args.download:
-        tmp_dir = Path(f"__tmp_{exp:04d}")
-        kaggle.api.kernels_output_cli(f"{kaggle_user['username']}/{nb_id}", path=tmp_dir)
+        tmp_dir = ROOT_DIR/f"__tmp_{exp:04d}"
+        tmp_dir.mkdir(exist_ok=True, parents=True)
+        kaggle.api.kernels_output_cli(f"{kaggle_user['username']}/{nb_id}", path=str(tmp_dir))
         subprocess.run(["tar", "-xzf", tmp_dir/"output.tgz", "__output"])
         import shutil
         shutil.rmtree(tmp_dir, ignore_errors=True)
         return
-    kernel_root = Path(f"__nb_{uname_kaggle}")
+    kernel_root = ROOT_DIR/f"__nb_{uname_kaggle}"
     kernel_root.mkdir(exist_ok=True, parents=True)
-    
+
     kernel_path = kernel_root/f"{exp:04d}"
     kernel_path.mkdir(exist_ok=True, parents=True)
     branch = args.branch
-    print(branch)
 
-    
     config = {
-        "id": f"{kaggle_user['username']}/{nb_id}",
-        # "id_no" : 3,
+        "id": str(Path(f"{kaggle_user['username']}")/nb_id),
         "title": nb_id.lower(),
         "code_file": f"{nb_id}.ipynb",
         "language": "python",
