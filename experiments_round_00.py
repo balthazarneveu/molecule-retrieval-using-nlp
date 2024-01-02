@@ -138,7 +138,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         configuration[BATCH_SIZE] = (32, 32, 32)    # RTX2060
         configuration[NB_EPOCHS] = 60
         configuration[OPTIMIZER][LEARNING_RATE] = 1e-5
-        configuration[OPTIMIZER][WEIGHT_DECAY] = 1.
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 1.  # OOPS!
         configuration[NAME] = 'Baseline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers-resume-8'
         model = BaselineModel(
@@ -153,5 +153,23 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
         model.load_state_dict(
             torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
-
+    if exp == 15:
+        configuration[BATCH_SIZE] = (32, 32, 32)    # RTX2060
+        configuration[NB_EPOCHS] = 60
+        configuration[OPTIMIZER][LEARNING_RATE] = 2e-6
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - resume 8'
+        model = BaselineModel(
+            model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+            nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
+        if backup_root is not None:
+            pretrained_model_path = backup_root/'0008_Baseline-BERT-GCN/model_0058.pt'
+        elif root_dir is not None:
+            pretrained_model_path = root_dir/'__output'/'0008_Baseline-BERT-GCN/model_0058.pt'
+        else:
+            raise ValueError("No root_dir or backup_root provided")
+        assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
+        model.load_state_dict(
+            torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
     return model, configuration
