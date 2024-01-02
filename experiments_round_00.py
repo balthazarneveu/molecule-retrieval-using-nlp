@@ -124,6 +124,16 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         model = BaselineModel(
             model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
             nhid=300, graph_hidden_channels=300)
+    if exp == 13:
+        configuration[BATCH_SIZE] = (32, 32, 32)    # RTX2060
+        configuration[NB_EPOCHS] = 60
+        configuration[OPTIMIZER][LEARNING_RATE] = 5e-6
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.2
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers - RTX2060'
+        model = BaselineModel(
+            model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+            nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
     if exp == 14:
         configuration[BATCH_SIZE] = (32, 32, 32)    # RTX2060
         configuration[NB_EPOCHS] = 60
@@ -143,4 +153,5 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         assert pretrained_model_path.exists(), f"Pretrained model not found at {pretrained_model_path}"
         model.load_state_dict(
             torch.load(pretrained_model_path, map_location='cpu')['model_state_dict'])
+
     return model, configuration
