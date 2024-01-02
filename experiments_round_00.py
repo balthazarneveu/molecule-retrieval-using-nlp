@@ -219,12 +219,18 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                               nout=768, nhid=300, graph_hidden_channels=300)  # nout = bert model hidden dim
         configuration[NB_EPOCHS] = 120
         configuration[OPTIMIZER] = {
+            LEARNING_RATE: 2e-6,
+            WEIGHT_DECAY: 0.3,
+            BETAS: [0.9, 0.999]  # Default ADAM parameters
+        }
+        batch_size_val = None
+        if exp == 60:
+            configuration[NB_EPOCHS] = 150
+            batch_size = 64  # 96 or 128 Does not work even on Kaggle.
+            configuration[OPTIMIZER] = {
                 LEARNING_RATE: 2e-6,
                 WEIGHT_DECAY: 0.3,
-                BETAS: [0.9, 0.999]  # Default ADAM parameters
-        }
-        if exp == 60:
-            batch_size = 64  # 96 or 128 Does not work even on Kaggle.
+            }
         if exp == 61:
             configuration[OPTIMIZER] = {
                 LEARNING_RATE: 2e-6,
@@ -249,7 +255,9 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 WEIGHT_DECAY: 0.5,
             }
             batch_size = 32  # suitable for RTX 2060
-        configuration[BATCH_SIZE] = (batch_size, batch_size, batch_size)
+        if batch_size_val is None:
+            batch_size_val = batch_size
+        configuration[BATCH_SIZE] = (batch_size, batch_size_val, batch_size_val)
     return model, configuration
 
 
