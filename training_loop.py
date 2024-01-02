@@ -69,8 +69,11 @@ def train(
 
 def training(
     model: torch.nn.Module,
-    output_directory: Path, configuration: dict, tokenizer: PreTrainedTokenizer,
+    output_directory: Path,
+    configuration: dict,
+    tokenizer: PreTrainedTokenizer,
     device: str,
+    optimizer_state_dict: dict = None,
     print_freq: int = 50,
     backup_folder: Path = None,
     tensorboard_root: Path = ROOT_DIR / '__tensorboard_logs',
@@ -96,7 +99,8 @@ def training(
     model.to(device)
 
     optimizer = optim.AdamW(model.parameters(), **configuration[OPTIMIZER])
-
+    if optimizer_state_dict is not None:
+        optimizer.load_state_dict(optimizer_state_dict)
     epoch = 0
     loss = 0
     all_losses = []

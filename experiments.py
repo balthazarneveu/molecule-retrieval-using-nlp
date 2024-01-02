@@ -1,6 +1,6 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, WEIGHT_DECAY, BETAS, OPTIMIZER,
-    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, PLATFORM, MODEL_SIZE, SHA1
+    TRAIN, VALIDATION, TEST, ID, MAX_STEP_PER_EPOCH, PLATFORM, MODEL_SIZE, SHA1, OPTIMIZER_STATE_DICT
 )
 import torch
 from experiments_round_00 import get_baseline_experience
@@ -53,7 +53,13 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         TEST: configuration[BATCH_SIZE][2]
     }
     configuration[SHA1] = get_git_sha1()
-    return model, configuration
+    optimizer_state_dict = configuration[OPTIMIZER].get(OPTIMIZER_STATE_DICT)
+    if optimizer_state_dict is not None:
+        configuration["optimizer_initial_state_dict"] = "reloaded"
+    else:
+        configuration["optimizer_initial_state_dict"] = "empty"
+    configuration[OPTIMIZER].pop(OPTIMIZER_STATE_DICT)  # to avoid writing it in the configuation file
+    return model, configuration, optimizer_state_dict
 
 
 if __name__ == "__main__":
