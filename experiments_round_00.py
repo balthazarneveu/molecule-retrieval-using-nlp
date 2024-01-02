@@ -224,9 +224,31 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 BETAS: [0.9, 0.999]  # Default ADAM parameters
         }
         if exp == 60:
-            batch_size = 128
+            batch_size = 96  # 128 Does not work even on Kaggle.
         if exp == 61:
-            batch_size = 64  # suitable for RTX 2060
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 2e-6,
+                WEIGHT_DECAY: 0.3,
+            }
+            batch_size = 32  # suitable for RTX 2060
+        if exp == 62:
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 1e-6,
+                WEIGHT_DECAY: 0.3,
+            }
+            batch_size = 32  # suitable for RTX 2060
+        if exp == 63:
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 5e-7,
+                WEIGHT_DECAY: 0.3,
+            }
+            batch_size = 32  # suitable for RTX 2060
+        if exp == 64:
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 2e-6,
+                WEIGHT_DECAY: 0.5,
+            }
+            batch_size = 32  # suitable for RTX 2060
         configuration[BATCH_SIZE] = (batch_size, batch_size, batch_size)
     return model, configuration
 
