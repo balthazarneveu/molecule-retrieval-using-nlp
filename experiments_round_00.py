@@ -1,6 +1,7 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, OPTIMIZER,
-    MAX_STEP_PER_EPOCH, BETAS
+    MAX_STEP_PER_EPOCH, BETAS, OPTIMIZER_STATE_DICT
+
 )
 from pathlib import Path
 import torch
@@ -262,6 +263,23 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 LEARNING_RATE: 7e-6,
                 WEIGHT_DECAY: 0.3,
             }
+        if exp == 66:
+            configuration[NB_EPOCHS] = 70
+            batch_size = 32
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 7e-6,
+                WEIGHT_DECAY: 0.3,
+            }
+            if backup_root is not None:
+                pretrained_model_path = backup_root/'0065_Base-HP-search'/'model_0069.pt'
+            elif root_dir is not None:
+                pretrained_model_path = root_dir/'__output'/'0065_Base-HP-search'/'model_0069.pt'
+            else:
+                raise ValueError("No root_dir or backup_root provided")
+            check_point = torch.load(pretrained_model_path, map_location='cpu')
+            model.load_state_dict(check_point['model_state_dict'])
+            configuration[OPTIMIZER][OPTIMIZER_STATE_DICT] = check_point['optimizer_state_dict']
+
         if batch_size_val is None:
             batch_size_val = batch_size
         configuration[BATCH_SIZE] = (batch_size, batch_size_val, batch_size_val)
