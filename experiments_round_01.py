@@ -63,7 +63,7 @@ def get_round_1_experience(exp: int, configuration: dict, root_dir: Path = None,
         text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=True, adapter=text_adapter)
         model = MultimodalModel(graph_encoder, text_encoder)
 
-    if exp == 111 or exp == 113:
+    if exp in [111, 113, 114]:
         # Bigger GCN
         configuration["GCN-architecture"] = {
             "depth": 5,
@@ -71,15 +71,20 @@ def get_round_1_experience(exp: int, configuration: dict, root_dir: Path = None,
             "GCN-hidden-size": 256,
             "GNN-out-size": 768,
         }
-        configuration[TOKENIZER_NAME] = "allenai/scibert_scivocab_uncased"
-        configuration[BATCH_SIZE] = (8, 8, 8)
-        if exp == 113:
-            configuration[BATCH_SIZE] = (32, 32, 32)
+
+        configuration[BATCH_SIZE] = (32, 32, 32)
+        if exp == 111:
+            configuration[BATCH_SIZE] = (8, 8, 8)
         configuration[NB_EPOCHS] = 60
         configuration[OPTIMIZER][LEARNING_RATE] = 1e-4
         configuration[OPTIMIZER][WEIGHT_DECAY] = 0.01
-        configuration[NAME] = 'F-SciBERT-ADAPT-Bigger-GCN'
-        configuration[ANNOTATIONS] = 'Frozen SciBERT - Trainable bigger GCN'
+        if exp in [111, 113]:
+            configuration[TOKENIZER_NAME] = "allenai/scibert_scivocab_uncased"
+            configuration[NAME] = 'F-SciBERT-ADAPT-Bigger-GCN'
+            configuration[ANNOTATIONS] = 'Frozen SciBERT - Trainable bigger GCN'
+        if exp in [114]:
+            configuration[NAME] = 'FBERT-ADAPT-Bigger-GCN'
+            configuration[ANNOTATIONS] = 'Frozen BERT - Trainable bigger GCN'
         shared_out_size = 512
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=shared_out_size,
                                         nhid=256, graph_hidden_channels=512)
