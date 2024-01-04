@@ -18,22 +18,24 @@ def eval(model, val_loader, device='cuda', max_count: Optional[int] = None, scor
     for batch_idx, batch in tqdm(enumerate(val_loader), total=len(val_loader), desc=desc):
         if max_count is not None and batch_idx > max_count:
             break
+        try:
+            input_ids = batch.input_ids
+            batch.pop('input_ids')
+            attention_mask = batch.attention_mask
+            batch.pop('attention_mask')
+            graph_batch = batch
+            x_graph, x_text = model(graph_batch.to(device),
+                                    input_ids.to(device),
+                                    attention_mask.to(device))
 
-        input_ids = batch.input_ids
-        batch.pop('input_ids')
-        attention_mask = batch.attention_mask
-        batch.pop('attention_mask')
-        graph_batch = batch
-
-        x_graph, x_text = model(graph_batch.to(device),
-                                input_ids.to(device),
-                                attention_mask.to(device))
-
-        current_loss = contrastive_loss(x_graph, x_text)
-        val_loss += current_loss.item()
-        if score:
-            text_embeddings.append(x_text.cpu().detach().numpy())
-            graph_embeddings.append(x_graph.cpu().detach().numpy())
+            current_loss = contrastive_loss(x_graph, x_text)
+            val_loss += current_loss.item()
+            if score:
+                text_embeddings.append(x_text.cpu().detach().numpy())
+                graph_embeddings.append(x_graph.cpu().detach().numpy())
+        except Exception as exc:
+            print(exc)
+            pass
 
     if score:
         # Perform score evaluation on CPU - probably slows things down a bit.

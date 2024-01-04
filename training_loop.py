@@ -110,12 +110,18 @@ def training(
     max_count = configuration[MAX_STEP_PER_EPOCH]
     last_checkpoint = []
     for epoch in range(nb_epochs):
-        torch.cuda.empty_cache()
+        if "cuda" in device:
+            torch.cuda.empty_cache()
+        epoch_losses = [0]
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
                                     max_count=max_count, print_freq=print_freq, device=device,
                                     writer=writer_tra)
         all_losses.extend(epoch_losses)
-        val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count, score=True)
+        model.eval()
+        if "cuda" in device:
+            torch.cuda.empty_cache()
+        with torch.no_grad():
+            val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count, score=True)
         best_validation_loss = min(best_validation_loss, val_loss)
         best_accuracy = max(best_accuracy, lrap_score)
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
