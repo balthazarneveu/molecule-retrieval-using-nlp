@@ -3,16 +3,24 @@ from transformers import AutoModel
 from generic import GenericModel
 import torch
 from typing import Optional
+from peft import LoraConfig, get_peft_model
 
 
 class TextEncoder(GenericModel):
     def __init__(
-        self, model_name: str = 'distilbert-base-uncased',
+        self,
+        model_name: str = 'distilbert-base-uncased',
         freeze: bool = True,
+        lora: Optional[dict] = None,
         adapter: Optional[GenericModel] = None
     ):
         super(TextEncoder, self).__init__()
         self.bert = AutoModel.from_pretrained(model_name)
+        if lora is not None and lora != {}:
+            peft_config = LoraConfig(**lora)
+            self.bert = get_peft_model(self.bert, peft_config)
+            self.bert.print_trainable_parameters()
+
         if freeze:
             for param in self.bert.parameters():
                 param.requires_grad = False
