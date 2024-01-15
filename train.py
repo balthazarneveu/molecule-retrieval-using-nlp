@@ -14,7 +14,8 @@ def train_experience(
         debug: bool = False,
         device=None,
         backup_root: Path = None,
-        wandb_flag: bool = True
+        wandb_flag: bool = True,
+        override: bool = False
 ) -> None:
     if debug:
         print_freq = 5
@@ -28,7 +29,8 @@ def train_experience(
 
     if output_directory.exists():
         logging.warning(f"Experience {exp} already trained")
-        return
+        if not override:
+            return
     if wandb_flag:
         run = wandb.init(
             project="molecule-nlp",
@@ -55,8 +57,9 @@ if __name__ == '__main__':
     parser = get_default_parser()
     parser.add_argument("-b", "--backup-root", type=Path, default=None, help="Backup root folder")
     parser.add_argument("-w", "--wandb-api-key", type=str, default=None, help="Wandb API key")
-    parser.add_argument("--no-wandb", action="store_true", help="Disable wandb")
+    parser.add_argument("-nowb", "--no-wandb", action="store_true", help="Disable wandb")
     parser.add_argument("--no-eval", action="store_true", help="Disable final evaluation")
+    parser.add_argument("-f", "--force", action="store_true", help="Disable final evaluation")
     args = parser.parse_args()
     if not args.no_wandb and args.wandb_api_key is not None:
         wandb_login(args.wandb_api_key)
@@ -66,7 +69,8 @@ if __name__ == '__main__':
             debug=args.debug,
             backup_root=args.backup_root,
             device=args.device,
-            wandb_flag=not args.no_wandb
+            wandb_flag=not args.no_wandb,
+            override=args.force
         )
         if not args.no_eval:
             for phase in [VALIDATION, TEST]:
