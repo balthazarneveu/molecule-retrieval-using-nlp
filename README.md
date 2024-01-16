@@ -23,6 +23,29 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
 Everything can be trained locally
 
 
+To use :parrot: LORA properly on BERT model in this project, you need to use a custom version of PEFT.
+
+```
+cd ~
+git clone https://github.com/huggingface/peft
+cd peft
+pip install -e .
+
+echo 'diff --git a/src/peft/tuners/tuners_utils.py b/src/peft/tuners/tuners_utils.py
+index d9aa7cb..a5cba30 100644
+--- a/src/peft/tuners/tuners_utils.py
++++ b/src/peft/tuners/tuners_utils.py
+@@ -158,6 +158,7 @@ class BaseTuner(nn.Module, ABC):
+         return self.active_adapter
+ 
+     def forward(self, *args: Any, **kwargs: Any):
++        kwargs.pop("labels", None)
+         return self.model.forward(*args, **kwargs)
+ 
+     @abstractmethod' | git apply
+cd ~
+```
+
 ## :satellite: Remote setup
 Supported platforms for training:
 - Google Colab
@@ -108,3 +131,5 @@ Command line will be provided to push results to Kaggle directly.
 ```shell
 kaggle competitions submit -c altegrad-2023-data-challenge -f __output/X/submission.csv -m "exp_X commit"
 ```
+
+
