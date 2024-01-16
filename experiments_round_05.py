@@ -6,6 +6,8 @@ from multimodal_model import MultimodalModel
 from language_model import TextEncoder
 from graph_model import BasicGraphEncoder
 from peft import TaskType
+import torch
+from typing import Tuple
 
 
 def get_load_configuration(model_name: str) -> dict:
@@ -35,25 +37,52 @@ def get_load_configuration(model_name: str) -> dict:
     return lora_dict
 
 
-def get_round_5_experience(exp: int, configuration: dict, root_dir: Path = None, backup_root: Path = None):
+SHORT_NAMES = ["distilbert", "scibert", "bert"]
+
+
+def lora_exp(
+    configuration: dict,
+    b: int = 32,
+    n: int = 150,
+    lr: float = 7e-6,
+    wd: float = 0.1,
+    model_name: str = "distilbert"
+) -> Tuple[torch.nn.Module, dict]:
+    configuration[NB_EPOCHS] = n
+    configuration[OPTIMIZER][LEARNING_RATE] = lr
+    configuration[OPTIMIZER][WEIGHT_DECAY] = wd
+    configuration[TOKENIZER_NAME] = model_name
+    configuration[BATCH_SIZE] = (b, b, b)
+    assert model_name in SHORT_NAMES, f"{model_name} must be in {SHORT_NAMES}"
+    if model_name == "distilbert":
+        configuration[TOKENIZER_NAME] = "distilbert-base-uncased"
+        configuration[NAME] = 'LoraBERT-GCN'
+        configuration[ANNOTATIONS] = 'Trainable Lora Distil BERT - base GCN'
+    if model_name == "scibert":
+        configuration[TOKENIZER_NAME] = "allenai/scibert_scivocab_uncased"
+        configuration[NAME] = 'LoraSciBERT-GCN'
+        configuration[ANNOTATIONS] = 'Lora SciBERT - base GCN'
+    lora_dict = get_load_configuration(configuration[TOKENIZER_NAME])
+    graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
+    text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=False, lora=lora_dict)
+    model = MultimodalModel(graph_encoder, text_encoder)
+
+    return model, configuration
+
+
+def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_root: Path = None):
     """Use LoRA to drastically reduce the number of parameters of the model
 
     https://github.com/balthazarneveu/molecule-retrieval-using-nlp/issues/19
+
+    Note
+    ====
+    - batch_size = 16  # T500
+    - batch_size = 32  # RTX2060
     """
     assert exp >= 500 and exp <= 599, "round 5 between 500 and 599"
     if exp == 500:
-        batch_size = 32  # RTX2060
-        # batch_size = 16  # T500
-        configuration[NB_EPOCHS] = 150
-        configuration[OPTIMIZER][LEARNING_RATE] = 7e-6
-        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
-        configuration[NAME] = 'LoraBERT-GCN'
-        configuration[ANNOTATIONS] = 'Trainable Lora Dsitil BERT - base GCN'
-        configuration[TOKENIZER_NAME] = "distilbert-base-uncased"
-        lora_dict = get_load_configuration(configuration[TOKENIZER_NAME])
-        graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
-        text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=False, lora=lora_dict)
-        model = MultimodalModel(graph_encoder, text_encoder)
-    
-    configuration[BATCH_SIZE] = (batch_size, batch_size, batch_size)
-    return model, configuration
+        model, conf = lora_exp(conf, b=32, n=150, lr=7e-6, wd=0.1, model_name="distilbert")
+    if exp == 501:
+        model, conf = lora_exp(conf, b=32, n=60, lr=7e-6, wd=0.1, model_name="scibert")
+    return model, conf
