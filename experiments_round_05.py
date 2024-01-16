@@ -48,7 +48,7 @@ def lora_exp(
     lr: float = 7e-6,
     wd: float = 0.1,
     model_name: str = "distilbert",
-    graph_encoder="base"
+    graph_encoder=None
 ) -> Tuple[torch.nn.Module, dict]:
     configuration[NB_EPOCHS] = n
     configuration[OPTIMIZER][LEARNING_RATE] = lr
