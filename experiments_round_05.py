@@ -101,4 +101,10 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
             "GNN-out-size": 768,
         }
         conf[ANNOTATIONS] += "- bigger GCN"
+    elif exp == 504:
+        model, conf = lora_exp(conf, b=32, n=20, lr=5e-5, wd=0.1, model_name="distilbert")
+    elif exp == 505:
+        model, conf = lora_exp(conf, b=32, n=20, lr=1e-4, wd=0.1, model_name="distilbert")
+    elif exp == 506:
+        model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, model_name="distilbert")
     return model, conf
