@@ -107,4 +107,14 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=32, n=20, lr=1e-4, wd=0.1, model_name="distilbert")
     elif exp == 506:
         model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, model_name="distilbert")
+    elif exp == 507:
+        graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
+        model, conf = lora_exp(conf, b=32, n=40, lr=3e-5, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
+        conf["GCN-architecture"] = {
+            "depth": 5,
+            "GCN-FC-hidden-size": 512,
+            "GCN-hidden-size": 256,
+            "GNN-out-size": 768,
+        }
+        conf[ANNOTATIONS] += "- bigger GCN"
     return model, conf
