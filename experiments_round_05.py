@@ -8,6 +8,7 @@ from graph_model import BasicGraphEncoder
 from peft import TaskType
 import torch
 from typing import Tuple
+from graph_model import BigGraphEncoder
 
 
 def get_load_configuration(model_name: str) -> dict:
@@ -46,7 +47,8 @@ def lora_exp(
     n: int = 150,
     lr: float = 7e-6,
     wd: float = 0.1,
-    model_name: str = "distilbert"
+    model_name: str = "distilbert",
+    graph_encoder="base"
 ) -> Tuple[torch.nn.Module, dict]:
     configuration[NB_EPOCHS] = n
     configuration[OPTIMIZER][LEARNING_RATE] = lr
@@ -57,13 +59,15 @@ def lora_exp(
     if model_name == "distilbert":
         configuration[TOKENIZER_NAME] = "distilbert-base-uncased"
         configuration[NAME] = 'LoraBERT-GCN'
-        configuration[ANNOTATIONS] = 'Trainable Lora Distil BERT - base GCN'
+        configuration[ANNOTATIONS] = 'Trainable Lora Distil BERT'
     if model_name == "scibert":
         configuration[TOKENIZER_NAME] = "allenai/scibert_scivocab_uncased"
         configuration[NAME] = 'LoraSciBERT-GCN'
-        configuration[ANNOTATIONS] = 'Lora SciBERT - base GCN'
+        configuration[ANNOTATIONS] = 'Lora SciBERT'
     lora_dict = get_load_configuration(configuration[TOKENIZER_NAME])
-    graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
+    if graph_encoder is None:
+        graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
+        configuration[ANNOTATIONS] += "- base GCN"
     text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=False, lora=lora_dict)
     model = MultimodalModel(graph_encoder, text_encoder)
 
@@ -86,5 +90,15 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     elif exp == 501:
         model, conf = lora_exp(conf, b=32, n=60, lr=7e-6, wd=0.1, model_name="scibert")
     elif exp == 502:
-        model, conf = lora_exp(conf, b=256, n=200, lr=7e-6, wd=0.1, model_name="scibert") # probably A5000 required
+        model, conf = lora_exp(conf, b=256, n=200, lr=7e-6, wd=0.1, model_name="scibert")  # probably A5000 required
+    elif exp == 503:
+        graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
+        model, conf = lora_exp(conf, b=128, n=150, lr=7e-6, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
+        conf["GCN-architecture"] = {
+            "depth": 5,
+            "GCN-FC-hidden-size": 512,
+            "GCN-hidden-size": 256,
+            "GNN-out-size": 768,
+        }
+        conf[ANNOTATIONS] += "- bigger GCN"
     return model, conf
