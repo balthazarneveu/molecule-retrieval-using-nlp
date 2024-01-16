@@ -1,0 +1,12 @@
+diff --git a/src/peft/tuners/tuners_utils.py b/src/peft/tuners/tuners_utils.py
+index d9aa7cb..a5cba30 100644
+--- a/src/peft/tuners/tuners_utils.py
++++ b/src/peft/tuners/tuners_utils.py
+@@ -158,6 +158,7 @@ class BaseTuner(nn.Module, ABC):
+         return self.active_adapter
+ 
+     def forward(self, *args: Any, **kwargs: Any):
++        kwargs.pop("labels", None)
+         return self.model.forward(*args, **kwargs)
+ 
+     @abstractmethod
