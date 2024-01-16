@@ -83,6 +83,8 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     assert exp >= 500 and exp <= 599, "round 5 between 500 and 599"
     if exp == 500:
         model, conf = lora_exp(conf, b=32, n=150, lr=7e-6, wd=0.1, model_name="distilbert")
-    if exp == 501:
+    elif exp == 501:
         model, conf = lora_exp(conf, b=32, n=60, lr=7e-6, wd=0.1, model_name="scibert")
+    elif exp == 502:
+        model, conf = lora_exp(conf, b=256, n=200, lr=7e-6, wd=0.1, model_name="scibert") # probably A5000 required
     return model, conf
