@@ -46,7 +46,7 @@ def lora_exp(
     b: int = 32,
     n: int = 150,
     lr: float = 7e-6,
-    wd: float = 0.1,
+    wd: float = 0.,
     model_name: str = "distilbert",
     graph_encoder=None
 ) -> Tuple[torch.nn.Module, dict]:
@@ -84,6 +84,16 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     - batch_size = 16  # T500
     - batch_size = 32  # RTX2060
     """
+    # After 20 epochs
+
+    # 500 LoraBERT-GCN	          17.8% <<< LR 7e-6
+    # 501 LoraSciBERT-GCN	      27.6% <<< LR 7e-6
+    # 504 LoraBERT-GCN            38.9% <<<  LR 5e-5
+    # 505 LoraBERT-GCN	          47.6% *** LR 1e-4
+    # 506 LoraBERT-GCN	          32.1% <<< LR 1e-3
+    # 507 LoraSciBERT-biggerGCN   47.7% <<< LR 3e-5  Kaggle
+
+    # 068 Base-HP-search	      46.1%
     assert exp >= 500 and exp <= 599, "round 5 between 500 and 599"
     if exp == 500:
         model, conf = lora_exp(conf, b=32, n=150, lr=7e-6, wd=0.1, model_name="distilbert")
@@ -101,13 +111,19 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
             "GNN-out-size": 768,
         }
         conf[ANNOTATIONS] += "- bigger GCN"
+        conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
     elif exp == 504:
+        # LR 5e-5 does is not optimal
         model, conf = lora_exp(conf, b=32, n=20, lr=5e-5, wd=0.1, model_name="distilbert")
-    elif exp == 505:
+    elif exp == 505:  # *************** #
+        # LR 1e-4 seems well balanced
         model, conf = lora_exp(conf, b=32, n=20, lr=1e-4, wd=0.1, model_name="distilbert")
     elif exp == 506:
-        model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, model_name="distilbert")
+        # LR 1e-3 is too high
+        model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, wd=0.1, model_name="distilbert")
     elif exp == 507:
+        # Seems to have a good convergence
+        # begining looks as good as training all BERT parameters with mega batch size 128 - exp 68
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
         model, conf = lora_exp(conf, b=32, n=40, lr=3e-5, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf["GCN-architecture"] = {
@@ -117,4 +133,12 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
             "GNN-out-size": 768,
         }
         conf[ANNOTATIONS] += "- bigger GCN"
+        conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
+    # HP Fast start grid search LR
+    elif exp == 508:
+        model, conf = lora_exp(conf, b=32, n=10, lr=3e-4, wd=0.1, model_name="distilbert")
+    elif exp == 509:
+        model, conf = lora_exp(conf, b=32, n=10, lr=6e-4, wd=0.1, model_name="distilbert")
+    elif exp == 510:
+        model, conf = lora_exp(conf, b=32, n=10, lr=1e-4, wd=0., model_name="distilbert")
     return model, conf
