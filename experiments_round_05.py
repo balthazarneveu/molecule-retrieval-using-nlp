@@ -121,11 +121,17 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     elif exp == 506:
         # LR 1e-3 is too high
         model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, wd=0.1, model_name="distilbert")
-    elif exp == 507:
+    elif exp == 507 or exp == 511:
         # Seems to have a good convergence
         # begining looks as good as training all BERT parameters with mega batch size 128 - exp 68
+        if exp == 507:
+            lr = 3e-5
+            n = 40
+        elif exp == 511:
+            lr = 3e-4
+            n = 10
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
-        model, conf = lora_exp(conf, b=32, n=40, lr=3e-5, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
+        model, conf = lora_exp(conf, b=32, n=n, lr=lr, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf["GCN-architecture"] = {
             "depth": 5,
             "GCN-FC-hidden-size": 512,
