@@ -155,4 +155,6 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=32, n=10, lr=1e-4, wd=0., model_name="distilbert")
     elif exp == 513:  # like 508 but more epochs
         model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
+    elif exp == 514:
+        model, conf = lora_exp(conf, b=192, n=200, lr=3e-4, wd=0.1, model_name="distilbert")  # Lea
     return model, conf
