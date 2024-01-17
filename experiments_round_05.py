@@ -88,7 +88,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
 
     # 500 LoraBERT-GCN	          17.8% <<< LR 7e-6
     # 501 LoraSciBERT-GCN	      27.6% <<< LR 7e-6
-    # 504 LoraBERT-GCN            38.9% <<<  LR 5e-5
+    # 504 LoraBERT-GCN            38.9% <<< LR 5e-5
     # 505 LoraBERT-GCN	          47.6% *** LR 1e-4
     # 506 LoraBERT-GCN	          32.1% <<< LR 1e-3
     # 507 LoraSciBERT-biggerGCN   47.7% <<< LR 3e-5  Kaggle
@@ -121,17 +121,23 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     elif exp == 506:
         # LR 1e-3 is too high
         model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, wd=0.1, model_name="distilbert")
-    elif exp == 507 or exp == 511:
+    elif exp == 507 or exp == 511 or exp == 512:
         # Seems to have a good convergence
         # begining looks as good as training all BERT parameters with mega batch size 128 - exp 68
         if exp == 507:
             lr = 3e-5
             n = 40
+            b = 32
         elif exp == 511:
             lr = 3e-4
             n = 10
+            b = 32
+        elif exp == 512:
+            lr = 3e-4
+            n = 40
+            b = 64
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
-        model, conf = lora_exp(conf, b=32, n=n, lr=lr, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
+        model, conf = lora_exp(conf, b=b, n=n, lr=lr, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf["GCN-architecture"] = {
             "depth": 5,
             "GCN-FC-hidden-size": 512,
@@ -141,7 +147,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[ANNOTATIONS] += "- bigger GCN"
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
     # HP Fast start grid search LR
-    elif exp == 508:
+    elif exp == 508:  # **BEST START SO FAR**
         model, conf = lora_exp(conf, b=32, n=10, lr=3e-4, wd=0.1, model_name="distilbert")
     elif exp == 509:
         model, conf = lora_exp(conf, b=32, n=10, lr=6e-4, wd=0.1, model_name="distilbert")
