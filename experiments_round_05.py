@@ -135,7 +135,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         elif exp == 512:
             lr = 3e-4
             n = 40
-            b = 64
+            b = 48
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
         model, conf = lora_exp(conf, b=b, n=n, lr=lr, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf["GCN-architecture"] = {
