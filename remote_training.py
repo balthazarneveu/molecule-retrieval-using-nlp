@@ -43,8 +43,10 @@ def main(argv):
     parser.add_argument("--branch", type=str, help="Git branch name", default=get_git_branch_name())
     parser.add_argument("-p", "--push", action="store_true", help="Push")
     parser.add_argument("-d", "--download", action="store_true", help="Download results")
+    parser.add_argument("-nb", "--nb-id", type=str, help="Notebook id", default=nb_id)
     args = parser.parse_args(argv)
     exp = args.exp
+    nb_id = args.nb_id
     kaggle_user = kaggle_users[args.user]
     uname_kaggle = kaggle_user["username"]
     kaggle.api._load_config(kaggle_user)
@@ -84,6 +86,8 @@ def main(argv):
         json.dump(config, f, indent=4)
 
     if args.push:
+        assert kernel_path.exists()
+        print(kernel_path)
         kaggle.api.kernels_push_cli(str(kernel_path))
 
 
