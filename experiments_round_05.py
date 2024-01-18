@@ -103,7 +103,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=128, n=200, lr=3e-4, wd=0.1, model_name="scibert")  # probably A5000 required
     elif exp == 503:
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
-        model, conf = lora_exp(conf, b=128, n=150, lr=7e-6, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
+        model, conf = lora_exp(conf, b=96, n=150, lr=7e-6, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf["GCN-architecture"] = {
             "depth": 5,
             "GCN-FC-hidden-size": 512,
