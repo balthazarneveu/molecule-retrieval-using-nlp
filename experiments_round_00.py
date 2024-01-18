@@ -275,7 +275,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 65, backup_root=backup_root, configuration=configuration, model=model)
         if exp == 68:
             configuration[NB_EPOCHS] = 120
-            batch_size = 96
+            batch_size = 128
             configuration[OPTIMIZER] = {
                 LEARNING_RATE: 7e-6,
                 WEIGHT_DECAY: 0.3, # Copy of 65
