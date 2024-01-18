@@ -273,6 +273,14 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
             }
             model, configuration = reload_model_and_optimizer_state(
                 65, backup_root=backup_root, configuration=configuration, model=model)
+        if exp == 68:
+            configuration[NB_EPOCHS] = 120
+            batch_size = 96
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 7e-6,
+                WEIGHT_DECAY: 0.3, # Copy of 65
+            }
+
         if batch_size_val is None:
             batch_size_val = batch_size
         configuration[BATCH_SIZE] = (batch_size, batch_size_val, batch_size_val)
