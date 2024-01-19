@@ -1,6 +1,6 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, OPTIMIZER,
-    MAX_STEP_PER_EPOCH, BETAS, OPTIMIZER_STATE_DICT
+    MAX_STEP_PER_EPOCH, BETAS, OPTIMIZER_STATE_DICT, SCHEDULER, SCHEDULER_CONFIGURATION
 
 )
 from pathlib import Path
@@ -273,14 +273,23 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
             }
             model, configuration = reload_model_and_optimizer_state(
                 65, backup_root=backup_root, configuration=configuration, model=model)
-        if exp == 68:
+        if exp == 68: # BEST PERFORMING EXPERIMENT
             configuration[NB_EPOCHS] = 120
             batch_size = 128
             configuration[OPTIMIZER] = {
                 LEARNING_RATE: 7e-6,
                 WEIGHT_DECAY: 0.3, # Copy of 65
             }
-
+        if exp == 69:
+            configuration[NAME] = 'Base-' + 'LR-sched'
+            configuration[NB_EPOCHS] = 150
+            batch_size = 128
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 3e-4,
+                WEIGHT_DECAY: 0.3,
+            }
+            configuration[SCHEDULER] = "ReduceLROnPlateau"
+            configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         if batch_size_val is None:
             batch_size_val = batch_size
         configuration[BATCH_SIZE] = (batch_size, batch_size_val, batch_size_val)
