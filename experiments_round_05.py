@@ -141,6 +141,12 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
             lr = 1e-4
             n = 45
             b = 48
+        elif exp == 517:
+            lr = 1e-4
+            n = 45
+            b = 48
+            conf[SCHEDULER] = "ReduceLROnPlateau"
+            conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
         model, conf = lora_exp(conf, b=b, n=n, lr=lr, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf["GCN-architecture"] = {
@@ -163,7 +169,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     elif exp == 514:
         model, conf = lora_exp(conf, b=128, n=200, lr=3e-4, wd=0.1, model_name="distilbert")  # Lea
     elif exp == 516:  # like 508 but more epochs and with a LR scheduler
-        model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
+        model, conf = lora_exp(conf, b=8, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
     return model, conf
