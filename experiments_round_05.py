@@ -45,7 +45,7 @@ def lora_exp(
         graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
         configuration[ANNOTATIONS] += "- base GCN"
     q_dict = None
-    if quantization is not False:
+    if quantization is not None:
         if quantization == "nf4":
             q_dict = get_quantization_configuration()
             configuration[NAME] = configuration[NAME].replace("Lora", "QLora")
