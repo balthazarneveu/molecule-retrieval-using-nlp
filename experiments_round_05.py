@@ -12,7 +12,7 @@ from typing import Tuple
 from graph_model import BigGraphEncoder
 
 
-def get_load_configuration(model_name: str) -> dict:
+def get_lora_configuration(model_name: str) -> dict:
     if "distil" in model_name:
         target_modules = {
             "q_lin",
@@ -65,7 +65,7 @@ def lora_exp(
         configuration[TOKENIZER_NAME] = "allenai/scibert_scivocab_uncased"
         configuration[NAME] = 'LoraSciBERT-GCN'
         configuration[ANNOTATIONS] = 'Lora SciBERT'
-    lora_dict = get_load_configuration(configuration[TOKENIZER_NAME])
+    lora_dict = get_lora_configuration(configuration[TOKENIZER_NAME])
     if graph_encoder is None:
         graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
         configuration[ANNOTATIONS] += "- base GCN"
