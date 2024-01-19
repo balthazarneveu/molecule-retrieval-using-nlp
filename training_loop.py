@@ -48,6 +48,8 @@ def train(
         x_graph, x_text = model(graph_batch.to(device),
                                 input_ids.to(device),
                                 attention_mask.to(device))
+        if x_text.dtype == torch.float16:
+            x_graph = x_graph.half()
         current_loss = contrastive_loss(x_graph, x_text)
         optimizer.zero_grad()
         current_loss.backward()
@@ -145,7 +147,8 @@ def training(
         writer_val.add_scalar('Loss', val_loss, (epoch+1) * len(train_loader) + len(train_loader))
         writer_val.add_scalar('Score', lrap_score, (epoch+1) * len(train_loader) + len(train_loader))
         if wandb_flag:
-            wandb.log({"Validation Loss": val_loss, "Score": lrap_score, "Learning Rate": optimizer.param_groups[0]['lr']})
+            wandb.log({"Validation Loss": val_loss, "Score": lrap_score,
+                      "Learning Rate": optimizer.param_groups[0]['lr']})
         metric_file_name = f'metrics__{epoch:04d}.json'
         metric_files_list = [output_directory/metric_file_name]
         if backup_folder is not None:
