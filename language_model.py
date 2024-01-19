@@ -1,9 +1,10 @@
 
-from transformers import AutoModel
+from transformers import AutoModel, AutoModelForCausalLM
 from generic import GenericModel
 import torch
 from typing import Optional
 from peft import LoraConfig, get_peft_model
+from transformers import BitsAndBytesConfig
 
 
 class TextEncoder(GenericModel):
@@ -12,10 +13,12 @@ class TextEncoder(GenericModel):
         model_name: str = 'distilbert-base-uncased',
         freeze: bool = True,
         lora: Optional[dict] = None,
-        adapter: Optional[GenericModel] = None
+        adapter: Optional[GenericModel] = None,
+        quantization_config=None
     ):
         super(TextEncoder, self).__init__()
-        self.bert = AutoModel.from_pretrained(model_name)
+
+        self.bert = AutoModel.from_pretrained(model_name, quantization_config=quantization_config)
         if lora is not None and lora != {}:
             peft_config = LoraConfig(**lora)
             self.bert = get_peft_model(self.bert, peft_config)
