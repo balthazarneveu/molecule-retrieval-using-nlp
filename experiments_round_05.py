@@ -6,37 +6,11 @@ from pathlib import Path
 from multimodal_model import MultimodalModel
 from language_model import TextEncoder
 from graph_model import BasicGraphEncoder
-from peft import TaskType
+
 import torch
 from typing import Tuple
 from graph_model import BigGraphEncoder
-
-
-def get_lora_configuration(model_name: str) -> dict:
-    if "distil" in model_name:
-        target_modules = {
-            "q_lin",
-            "k_lin",
-            "v_lin",
-            "out_lin",
-        }
-    else:
-        target_modules = {
-            "query",
-            "key",
-            "value",
-            "dense",
-        }
-    lora_dict = dict(
-        task_type=TaskType.CAUSAL_LM,
-        # task_type=TaskType.SEQ_CLS,
-        inference_mode=False,
-        target_modules=target_modules,
-        r=8,
-        lora_alpha=32,
-        lora_dropout=0.1
-    )
-    return lora_dict
+from lora import get_lora_configuration, get_quantization_configuration
 
 
 SHORT_NAMES = ["distilbert", "scibert", "bert"]
@@ -49,7 +23,8 @@ def lora_exp(
     lr: float = 7e-6,
     wd: float = 0.,
     model_name: str = "distilbert",
-    graph_encoder=None
+    graph_encoder=None,
+    quantization=None
 ) -> Tuple[torch.nn.Module, dict]:
     configuration[NB_EPOCHS] = n
     configuration[OPTIMIZER][LEARNING_RATE] = lr
@@ -69,7 +44,14 @@ def lora_exp(
     if graph_encoder is None:
         graph_encoder = BasicGraphEncoder(num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300)
         configuration[ANNOTATIONS] += "- base GCN"
-    text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=False, lora=lora_dict)
+    q_dict = None
+    if quantization is not False:
+        if quantization == "nf4":
+            q_dict = get_quantization_configuration()
+            configuration[NAME] = configuration[NAME].replace("Lora", "QLora")
+        else:
+            raise NameError(f"Quantization {quantization} not implemented")
+    text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=False, lora=lora_dict, quantization_config=q_dict)
     model = MultimodalModel(graph_encoder, text_encoder)
 
     return model, configuration
