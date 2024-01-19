@@ -114,7 +114,7 @@ def training(
     if configuration.get(SCHEDULER, False):
         scheduler_config = configuration[SCHEDULER_CONFIGURATION]
         if configuration[SCHEDULER] == "ReduceLROnPlateau":
-            scheduler = ReduceLROnPlateau(optimizer, 'max', verbose=True, **scheduler_config)
+            scheduler = ReduceLROnPlateau(optimizer, mode='max', verbose=True, **scheduler_config)
     for epoch in range(nb_epochs):
         if "cuda" in device:
             torch.cuda.empty_cache()

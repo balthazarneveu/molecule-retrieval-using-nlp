@@ -165,5 +165,5 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     elif exp == 516:  # like 508 but more epochs and with a LR scheduler
         model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
         conf[SCHEDULER] = "ReduceLROnPlateau"
-        conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5, verbose=True)
+        conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
     return model, conf
