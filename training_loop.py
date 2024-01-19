@@ -1,5 +1,5 @@
 from properties import (
-    NB_EPOCHS, BATCH_SIZE, OPTIMIZER,
+    NB_EPOCHS, BATCH_SIZE, OPTIMIZER, SCHEDULER, SCHEDULER_CONFIGURATION,
     TRAIN, VALIDATION, DATA_DIR, MAX_STEP_PER_EPOCH, ROOT_DIR,
     TOKENIZER_NAME
 )
@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from loss import contrastive_loss
 from tqdm import tqdm
 import logging
@@ -109,6 +110,11 @@ def training(
     best_validation_loss = 1000000
     max_count = configuration[MAX_STEP_PER_EPOCH]
     last_checkpoint = []
+    scheduler = None
+    if configuration.get(SCHEDULER, False):
+        scheduler_config = configuration[SCHEDULER_CONFIGURATION]
+        if configuration[SCHEDULER] == "ReduceLROnPlateau":
+            scheduler = ReduceLROnPlateau(optimizer, 'max', verbose=True, **scheduler_config)
     for epoch in range(nb_epochs):
         if "cuda" in device:
             torch.cuda.empty_cache()
@@ -122,6 +128,8 @@ def training(
             torch.cuda.empty_cache()
         with torch.no_grad():
             val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count, score=True)
+            if scheduler is not None:
+                scheduler.step(lrap_score)
         best_validation_loss = min(best_validation_loss, val_loss)
         best_accuracy = max(best_accuracy, lrap_score)
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
