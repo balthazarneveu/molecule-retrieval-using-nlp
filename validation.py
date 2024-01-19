@@ -27,7 +27,8 @@ def eval(model, val_loader, device='cuda', max_count: Optional[int] = None, scor
             x_graph, x_text = model(graph_batch.to(device),
                                     input_ids.to(device),
                                     attention_mask.to(device))
-
+            if x_text.dtype == torch.float16:
+                x_graph = x_graph.half()
             current_loss = contrastive_loss(x_graph, x_text)
             val_loss += current_loss.item()
             if score:
