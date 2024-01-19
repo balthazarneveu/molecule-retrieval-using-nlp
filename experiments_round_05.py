@@ -160,4 +160,8 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+    elif exp == 519:
+        model, conf = lora_exp(conf, b=128, n=150, lr=3e-4, wd=0.1, model_name="distilbert", quantization="nf4")
+        conf[SCHEDULER] = "ReduceLROnPlateau"
+        conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
     return model, conf
