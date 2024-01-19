@@ -122,7 +122,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
     elif exp == 506:
         # LR 1e-3 is too high
         model, conf = lora_exp(conf, b=32, n=20, lr=1e-3, wd=0.1, model_name="distilbert")
-    elif exp in [507, 511, 512, 515]:
+    elif exp in [507, 511, 512, 515, 517]:
         # Seems to have a good convergence
         # begining looks as good as training all BERT parameters with mega batch size 128 - exp 68
         if exp == 507:
