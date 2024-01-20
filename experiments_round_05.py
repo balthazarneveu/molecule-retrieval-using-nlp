@@ -160,7 +160,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
-    elif exp == 519:
+    elif exp == 519:  # Kaggle experiment
         model, conf = lora_exp(conf, b=128, n=150, lr=3e-4, wd=0.1, model_name="distilbert", quantization="nf4")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
@@ -175,4 +175,8 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- bigger GCN"
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
+    elif exp == 522:  # Kaggle experiment - change scheduler
+        model, conf = lora_exp(conf, b=128, n=75, lr=3e-4, wd=0.1, model_name="distilbert", quantization="nf4")
+        conf[SCHEDULER] = "ReduceLROnPlateau"
+        conf[SCHEDULER_CONFIGURATION] = dict(patience=6, factor=0.8)
     return model, conf
