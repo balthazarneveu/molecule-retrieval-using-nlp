@@ -164,9 +164,13 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=128, n=150, lr=3e-4, wd=0.1, model_name="distilbert", quantization="nf4")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
-    elif exp == 520:
-        graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
+    elif exp == 520:  # Not a bigger GCN
         model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert")
+        conf[SCHEDULER] = "ReduceLROnPlateau"
+        conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+    elif exp == 521:
+        graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
+        model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert", graph_encoder=graph_encoder)
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- bigger GCN"
