@@ -187,10 +187,11 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[NAME] = conf[NAME].replace("GCN", "FatGCN")
     elif exp == 524:
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
-        model, conf = lora_exp(conf, b=32, n=150, lr=3e-4, wd=0.1, model_name="distilbert", graph_encoder=graph_encoder)
+        model, conf = lora_exp(conf, b=32, n=150, lr=5e-4, wd=0.1, model_name="distilbert", graph_encoder=graph_encoder)
         conf[SCHEDULER] = "CosineAnnealingWarmRestarts"
         conf[SCHEDULER_CONFIGURATION] = dict(T_0=30, T_mult=1, eta_min=1e-5)
         conf[ANNOTATIONS] += "- bigger GCN"
-        
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
+    else:
+        raise NameError(f"Experiment {exp} not implemented")
     return model, conf
