@@ -5,11 +5,10 @@ from properties import (
 from pathlib import Path
 from multimodal_model import MultimodalModel
 from language_model import TextEncoder
-from graph_model import BasicGraphEncoder
+from graph_model import BasicGraphEncoder, BigGraphEncoder, FatGraphEncoder
 
 import torch
 from typing import Tuple
-from graph_model import BigGraphEncoder
 from lora import get_lora_configuration, get_quantization_configuration
 
 
@@ -179,4 +178,11 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         model, conf = lora_exp(conf, b=128, n=75, lr=3e-4, wd=0.1, model_name="distilbert", quantization="nf4")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=6, factor=0.8)
+    elif exp == 523:
+        graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
+        model, conf = lora_exp(conf, b=32, n=75, lr=3e-4, wd=0.1, model_name="distilbert", graph_encoder=graph_encoder)
+        conf[SCHEDULER] = "ReduceLROnPlateau"
+        conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+        conf[ANNOTATIONS] += "- fat GCN"
+        conf[NAME] = conf[NAME].replace("GCN", "FatGCN")
     return model, conf
