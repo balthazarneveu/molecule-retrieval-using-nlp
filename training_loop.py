@@ -152,7 +152,7 @@ def training(
         epoch_losses = [0]
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
                                     max_count=max_count, print_freq=print_freq, device=device,
-                                    writer=writer_tra, shceduler=scheduler)
+                                    writer=writer_tra, scheduler=scheduler)
         all_losses.extend(epoch_losses)
         model.eval()
         if "cuda" in device:
