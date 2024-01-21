@@ -14,11 +14,11 @@ import os
 from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
 from loss import contrastive_loss
 from tqdm import tqdm
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 from validation import eval
 import wandb
 import shutil
@@ -28,8 +28,30 @@ def train(
         model, optimizer, count_iter, epoch, train_loader,
         max_count: Optional[int] = None,
         print_freq: Optional[int] = 50, device: Optional[str] = 'cuda',
-        writer: Optional[SummaryWriter] = None
-):
+        writer: Optional[SummaryWriter] = None,
+        scheduler=None
+) -> Tuple[torch.nn.Module, list]:
+    """
+    Trains the model for one epoch and returns the trained model and a list of losses for each batch.
+
+    Args:
+        model (torch.nn.Module): model to be trained.
+        optimizer (torch.optim.Optimizer): optimizer for training.
+        count_iter (int): current iteration count.
+        epoch (int): current epoch count.
+        train_loader (torch.utils.data.DataLoader): DataLoader for the training data.
+        max_count (int, optional): maximum number of batches to train on. If None, trains on all batches.
+        Defaults to None.
+        print_freq (int, optional): frequency of printing training status. Defaults to 50.
+        device (str, optional): device to train on. Defaults to 'cuda'.
+        writer (SummaryWriter, optional): TensorBoard writer. Defaults to None.
+        scheduler (torch.optim.lr_scheduler._LRScheduler, optional): learning rate scheduler.
+        Update performed only for CosineAnnealingWarmRestarts
+        https://wandb.ai/wandb_fc/tips/reports/How-to-Properly-Use-PyTorch-s-CosineAnnealingWarmRestarts-Scheduler--VmlldzoyMTA3MjM2
+
+    Returns:
+        Tuple[torch.nn.Module, list]: The trained model and a list of losses for each batch.
+    """
     logging.info('-----EPOCH{}-----'.format(epoch+1))
     model.train()
     losses = []
@@ -54,6 +76,9 @@ def train(
         optimizer.zero_grad()
         current_loss.backward()
         optimizer.step()
+        if scheduler is not None and isinstance(scheduler, CosineAnnealingWarmRestarts):
+            scheduler.step(epoch + batch_idx / total_batches)  # update learning rate inside of an epoch
+
         loss = current_loss.item()
         avg_loss += current_loss.item()
         count_iter += 1
@@ -117,20 +142,24 @@ def training(
         scheduler_config = configuration[SCHEDULER_CONFIGURATION]
         if configuration[SCHEDULER] == "ReduceLROnPlateau":
             scheduler = ReduceLROnPlateau(optimizer, mode='max', verbose=True, **scheduler_config)
+        elif configuration[SCHEDULER] == "CosineAnnealingWarmRestarts":
+            scheduler = CosineAnnealingWarmRestarts(optimizer, **scheduler_config)
+        else:
+            raise NameError(f"Scheduler {configuration[SCHEDULER]} not implemented")
     for epoch in range(nb_epochs):
         if "cuda" in device:
             torch.cuda.empty_cache()
         epoch_losses = [0]
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
                                     max_count=max_count, print_freq=print_freq, device=device,
-                                    writer=writer_tra)
+                                    writer=writer_tra, shceduler=scheduler)
         all_losses.extend(epoch_losses)
         model.eval()
         if "cuda" in device:
             torch.cuda.empty_cache()
         with torch.no_grad():
             val_loss, lrap_score = eval(model, val_loader, device=device, max_count=max_count, score=True)
-            if scheduler is not None:
+            if scheduler is not None and isinstance(scheduler, ReduceLROnPlateau):
                 scheduler.step(lrap_score)
         best_validation_loss = min(best_validation_loss, val_loss)
         best_accuracy = max(best_accuracy, lrap_score)
