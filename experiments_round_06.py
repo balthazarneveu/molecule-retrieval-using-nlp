@@ -18,7 +18,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
             llm=DISTILBERT, graph=BIG_GCN,
             n=200,
             b=32, lr=lr, wd=1e-1,
-            lora=False, quantization=None
+            lora=True, quantization=None
         )
         configuration[SCHEDULER] = "LambdaLR"
         lr_lambda = partial(
