@@ -27,8 +27,9 @@ def generic_experiment(
     llm: str = DISTILBERT,
     lora=False,
     quantization=None,
-    scheduler=None,
     graph=BASE_GCN,
+    scheduler=None,
+    scheduler_configuration=None,
 ) -> Tuple[torch.nn.Module, dict]:
     # ------------------------------------------------------------------------------------ HYPERPARAMETERS
     configuration[NB_EPOCHS] = n
@@ -39,12 +40,15 @@ def generic_experiment(
     # ------------------------------------------------------------------------------------ SCHEDULER
     if scheduler is not None and isinstance(scheduler, str):
         assert scheduler in SCHEDULER_SHORT_NAMES, f"{scheduler} must be in {SCHEDULER_SHORT_NAMES}"
+        # Template schedulers
         if scheduler == PLATEAU:
             configuration[SCHEDULER] = "ReduceLROnPlateau"
             configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         elif scheduler == COSINE_WARMUP:
             configuration[SCHEDULER] = "CosineAnnealingWarmRestarts"
             configuration[SCHEDULER_CONFIGURATION] = dict(T_0=30, T_mult=1, eta_min=1e-5)
+        if scheduler_configuration is not None:
+            configuration[SCHEDULER_CONFIGURATION] = scheduler_configuration
     # ------------------------------------------------------------------------------------ LLM  DEFINITION
     if isinstance(llm, str):  # PREDEFINED LLM
         assert llm in LLM_SHORT_NAMES, f"{llm} must be in {LLM_SHORT_NAMES}"
