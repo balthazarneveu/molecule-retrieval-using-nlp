@@ -3,7 +3,7 @@ from properties import (
     SCHEDULER, SCHEDULER_CONFIGURATION,
     PLATEAU, COSINE_WARMUP,
     SCIBERT, DISTILBERT,
-    BASE_GCN, BIG_GCN, FAT_GCN 
+    BASE_GCN, BIG_GCN, FAT_GCN
 )
 from multimodal_model import MultimodalModel
 from language_model import TextEncoder
@@ -11,7 +11,7 @@ from graph_model import BasicGraphEncoder, BigGraphEncoder, FatGraphEncoder
 from lora import get_lora_configuration, get_quantization_configuration
 import torch
 import logging
-from typing import Tuple
+from typing import Tuple, Optional, Union
 LLM_SHORT_NAMES = [DISTILBERT, SCIBERT]
 GNN_SHORT_NAMES = [BASE_GCN, BIG_GCN, FAT_GCN]
 
@@ -24,12 +24,12 @@ def generic_experiment(
     n: int = 150,
     lr: float = 7e-6,
     wd: float = 0.,
-    llm: str = DISTILBERT,
-    lora=False,
-    quantization=None,
-    graph=BASE_GCN,
-    scheduler=None,
-    scheduler_configuration=None,
+    llm: Optional[Union[str, torch.nn.Module]] = DISTILBERT,
+    lora: Optional[bool] = False,
+    quantization: Optional[str] = None,
+    graph: Optional[Union[str, torch.nn.Module]] = BASE_GCN,
+    scheduler: Optional[str] = None,
+    scheduler_configuration: Optional[dict] = None,
 ) -> Tuple[torch.nn.Module, dict]:
     # ------------------------------------------------------------------------------------ HYPERPARAMETERS
     configuration[NB_EPOCHS] = n
@@ -67,6 +67,7 @@ def generic_experiment(
             lora_dict = get_lora_configuration(configuration[TOKENIZER_NAME])
             configuration[NAME] = 'Lora'+configuration[NAME]
             configuration[ANNOTATIONS] = 'Lora ' + configuration[ANNOTATIONS]
+            configuration["finetuning_mode"] = "LoRA"
         else:
             lora_dict = None
         if quantization is not None:
@@ -75,6 +76,7 @@ def generic_experiment(
                 q_dict = get_quantization_configuration()
                 configuration[NAME] = configuration[NAME].replace("Lora", "QLora")
                 configuration[ANNOTATIONS] = configuration[ANNOTATIONS].replace("Lora", "QLora")
+                configuration["quantization"] = quantization
             else:
                 raise NameError(f"Quantization {quantization} not implemented")
         text_encoder = TextEncoder(configuration[TOKENIZER_NAME], freeze=False,
