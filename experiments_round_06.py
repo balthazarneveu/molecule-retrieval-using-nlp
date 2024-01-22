@@ -12,7 +12,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
     assert exp >= 600 and exp < 699, f"Experiment {exp} is not in the round 90"
     # configuration["max_step_per_epoch"] = 5
     if exp == 600:
-        lr = 6e-4
+        lr = 4e-4
         model, configuration = generic_experiment(
             configuration,
             llm=DISTILBERT, graph=BIG_GCN,
