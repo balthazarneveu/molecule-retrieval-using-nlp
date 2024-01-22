@@ -22,3 +22,6 @@ ROOT_DIR = Path(__file__).parent
 DATA_DIR = ROOT_DIR / '__data'
 OUT_DIR = ROOT_DIR/'__output'
 OUT_DIR.mkdir(exist_ok=True, parents=True)
+PLATEAU, COSINE_WARMUP = "Plateau", "CosineWarmup"
+DISTILBERT, SCIBERT = "distilbert", "scibert"
+BASE_GCN, BIG_GCN, FAT_GCN = "base_gcn", "big_gcn", "fat_gcn"
