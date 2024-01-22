@@ -29,7 +29,9 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             configuration,
             llm=DISTILBERT, graph=BIG_GCN,
             n=200,
-            b=128, lr=3e-4, wd=1e-1, scheduler=PLATEAU,
+            b=128, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
             lora=False, quantization=None
         )
+    print(configuration)
     return model, configuration
