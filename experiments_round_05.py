@@ -199,14 +199,13 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[SCHEDULER_CONFIGURATION] = dict(T_0=40, T_mult=2, eta_min=1e-5)
         conf[ANNOTATIONS] += "- bigger GCN"
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
-    else:
-        raise NameError(f"Experiment {exp} not implemented")
-    
-     elif exp == 570: #exp 521 bigger batch size
+    elif exp == 570:  # exp 521 bigger batch size
         graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
         model, conf = lora_exp(conf, b=64, n=150, lr=3e-4, wd=0.1, model_name="distilbert", graph_encoder=graph_encoder)
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- bigger GCN"
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
+    else:
+        raise NameError(f"Experiment {exp} not implemented")
     return model, conf
