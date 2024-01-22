@@ -12,6 +12,7 @@ from lora import get_lora_configuration, get_quantization_configuration
 import torch
 import logging
 from typing import Tuple, Optional, Union
+import numpy as np
 LLM_SHORT_NAMES = [DISTILBERT, SCIBERT]
 GNN_SHORT_NAMES = [BASE_GCN, BIG_GCN, FAT_GCN]
 
@@ -126,3 +127,26 @@ def generic_experiment(
     model = MultimodalModel(graph_encoder, text_encoder)
 
     return model, configuration
+
+
+def custom_lr(
+    epoch,
+    warmup: int = 50, lr_init: float = 5e-4, lr_min: float = 1e-5,
+    lr_tmp: float = 1e-4,
+    period_oscillation: int = 20, periods_dampen: int = 5
+):
+    """To be used with partial
+    """
+    if epoch < warmup:
+        oscillator = (np.cos(epoch/warmup * np.pi) + 1)/2
+        return (lr_min + oscillator*(lr_init-lr_min))/lr_init
+    else:
+        t = (epoch-warmup)
+
+        t_mod = t % period_oscillation
+
+        iter = t//period_oscillation
+        oscillator = (np.cos(t_mod/(period_oscillation) * np.pi) + 1)/2
+        factor_modulation = max(0, ((periods_dampen-iter)/periods_dampen))
+        amplitude = factor_modulation*(lr_tmp-lr_min)
+        return (lr_min + oscillator*amplitude)/lr_init

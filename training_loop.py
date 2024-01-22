@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts, LambdaLR
 from loss import contrastive_loss
 from tqdm import tqdm
 import logging
@@ -76,7 +76,7 @@ def train(
         optimizer.zero_grad()
         current_loss.backward()
         optimizer.step()
-        if scheduler is not None and isinstance(scheduler, CosineAnnealingWarmRestarts):
+        if scheduler is not None and isinstance(scheduler, CosineAnnealingWarmRestarts) or isinstance(scheduler, LambdaLR):
             scheduler.step(epoch + batch_idx / total_batches)  # update learning rate inside of an epoch
 
         loss = current_loss.item()
@@ -144,6 +144,8 @@ def training(
             scheduler = ReduceLROnPlateau(optimizer, mode='max', verbose=True, **scheduler_config)
         elif configuration[SCHEDULER] == "CosineAnnealingWarmRestarts":
             scheduler = CosineAnnealingWarmRestarts(optimizer, **scheduler_config)
+        elif configuration[SCHEDULER] == "LambdaLR":
+            scheduler = LambdaLR(optimizer, **scheduler_config)
         else:
             raise NameError(f"Scheduler {configuration[SCHEDULER]} not implemented")
     for epoch in range(nb_epochs):
@@ -166,6 +168,10 @@ def training(
         print(f'-----EPOCH {epoch+1} ----- done.   ' +
               f'LRAP {lrap_score:.3%} | best {best_accuracy:.3%}')
         print(f"Validation loss:  {val_loss:.3e} - best : {best_validation_loss:.3e}")
+        if configuration.get(SCHEDULER, False):
+            if configuration[SCHEDULER] == "LambdaLR":
+                # print("REMOVE lr_lambda from configuration!!!")
+                configuration[SCHEDULER_CONFIGURATION].pop("lr_lambda", None)
         metrics_dict = {
             'epoch': epoch,
             'validation_loss': val_loss,
