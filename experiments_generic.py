@@ -55,7 +55,7 @@ def generic_experiment(
         configuration[TOKENIZER_NAME] = llm
         if llm == DISTILBERT:
             configuration[TOKENIZER_NAME] = "distilbert-base-uncased"
-            configuration[NAME] = 'BERT-GCN'
+            configuration[NAME] = 'BERT'
             configuration[ANNOTATIONS] = 'Distil BERT'
         elif llm == SCIBERT:
             configuration[TOKENIZER_NAME] = "allenai/scibert_scivocab_uncased"
