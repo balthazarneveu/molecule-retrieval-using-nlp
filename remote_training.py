@@ -1,7 +1,7 @@
 import kaggle
 from pathlib import Path
 import json
-from __kaggle_login import kaggle_users
+from __kaggle_logins import kaggle_users
 import argparse
 import sys
 import subprocess
