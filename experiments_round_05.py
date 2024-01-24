@@ -219,6 +219,8 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- fat GCN"
         conf[NAME] = conf[NAME].replace("GCN", "FatGCN")
+        conf[BATCH_SIZE] = (conf[BATCH_SIZE][0], conf[BATCH_SIZE][1]//2, conf[BATCH_SIZE][2]//2)
+        # Reuce validation batch size to avoid any issue
     else:
         raise NameError(f"Experiment {exp} not implemented")
 
