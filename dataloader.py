@@ -67,7 +67,7 @@ class GraphTextDataset(Dataset):
     def process(self):
         i = 0
         for raw_path in self.raw_paths:
-            cid = int(raw_path.split('/')[-1][:-6])
+            cid = int(raw_path.split(os.path.sep)[-1][:-6])
             text_input = self.tokenizer([self.description[1][cid]],
                                         return_tensors="pt",
                                         truncation=True,
