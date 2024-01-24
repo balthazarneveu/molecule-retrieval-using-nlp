@@ -212,14 +212,15 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- bigger GCN"
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
-    elif exp == 572:  # try scibert +fat-gcn +scheduler plateau
+    elif exp == 572 or exp == 573:  # try scibert +fat-gcn +scheduler plateau
         graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
         model, conf = lora_exp(conf, b=64, n=150, lr=3e-4, wd=0.1, model_name="scibert", graph_encoder=graph_encoder)
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- fat GCN"
         conf[NAME] = conf[NAME].replace("GCN", "FatGCN")
-        conf[BATCH_SIZE] = (conf[BATCH_SIZE][0], conf[BATCH_SIZE][1]//2, conf[BATCH_SIZE][2]//2)
+        if exp == 573:
+            conf[BATCH_SIZE] = (conf[BATCH_SIZE][0], conf[BATCH_SIZE][1]//2, conf[BATCH_SIZE][2]//2)
         # Reuce validation batch size to avoid any issue
     else:
         raise NameError(f"Experiment {exp} not implemented")
