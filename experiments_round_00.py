@@ -280,6 +280,13 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
                 LEARNING_RATE: 7e-6,
                 WEIGHT_DECAY: 0.3, # Copy of 65
             }
+        if exp == 68:
+            configuration[NB_EPOCHS] = 100
+            batch_size = 64
+            configuration[OPTIMIZER] = {
+                LEARNING_RATE: 7e-6,
+                WEIGHT_DECAY: 0.3, # Copy of 65
+            }
         # -----------end of exps------------------
         if batch_size_val is None:
             batch_size_val = batch_size
