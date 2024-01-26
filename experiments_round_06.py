@@ -1,6 +1,7 @@
 from properties import (
     SCHEDULER, SCHEDULER_CONFIGURATION,
-    DISTILBERT, BIG_GCN
+    DISTILBERT, BIG_GCN, PLATEAU,
+    LOSS
 )
 from pathlib import Path
 from experiments_generic import generic_experiment, custom_lr
@@ -28,5 +29,19 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
             periods_dampen=5
         )
         configuration[SCHEDULER_CONFIGURATION] = dict(lr_lambda=lr_lambda)
+    elif exp == 601:
+        # configuration["max_step_per_epoch"] = 5
+        lr = 4e-4
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=200,
+            b=32, lr=lr, wd=1e-1,
+            lora=True, quantization=None,
+            temperature=True,
+        )
+        configuration[SCHEDULER] = "ReduceLROnPlateau"
+        configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
+        configuration[LOSS] = "Tempered"
     print(configuration)
     return model, configuration

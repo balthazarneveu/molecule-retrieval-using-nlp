@@ -1,11 +1,14 @@
 from generic import GenericModel
+import torch
 
 
 class MultimodalModel(GenericModel):
-    def __init__(self, graph_encoder: GenericModel, text_encoder: GenericModel):
+    def __init__(self, graph_encoder: GenericModel, text_encoder: GenericModel, temperature: bool = False):
         super().__init__()
         self.graph_encoder = graph_encoder
         self.text_encoder = text_encoder
+        if temperature:
+            self.temperature = torch.nn.Parameter(temperature*torch.ones(1))
 
     def forward(self, graph_batch, input_ids, attention_mask):
         graph_encoded = self.graph_encoder(graph_batch)

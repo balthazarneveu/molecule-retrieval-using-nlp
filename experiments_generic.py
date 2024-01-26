@@ -31,6 +31,7 @@ def generic_experiment(
     graph: Optional[Union[str, torch.nn.Module]] = BASE_GCN,
     scheduler: Optional[str] = None,
     scheduler_configuration: Optional[dict] = None,
+    temperature: Optional[float] = None
 ) -> Tuple[torch.nn.Module, dict]:
     # ------------------------------------------------------------------------------------ HYPERPARAMETERS
     configuration[NB_EPOCHS] = n
@@ -124,7 +125,7 @@ def generic_experiment(
         logging.warning(f"Self defined Large Language Model {llm}!!!!")
         graph_encoder = graph
     # ------------------------------------------------------------------------------------ MODEL DEFINITION
-    model = MultimodalModel(graph_encoder, text_encoder)
+    model = MultimodalModel(graph_encoder, text_encoder, temperature=temperature)
 
     return model, configuration
 

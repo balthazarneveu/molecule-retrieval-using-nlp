@@ -25,3 +25,4 @@ OUT_DIR.mkdir(exist_ok=True, parents=True)
 PLATEAU, COSINE_WARMUP = "Plateau", "CosineWarmup"
 DISTILBERT, SCIBERT = "distilbert", "scibert"
 BASE_GCN, BIG_GCN, FAT_GCN = "base_gcn", "big_gcn", "fat_gcn"
+LOSS = "loss"
