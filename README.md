@@ -133,3 +133,11 @@ kaggle competitions submit -c altegrad-2023-data-challenge -f __output/X/submiss
 ```
 
 
+## Related papers review
+#### Text2Mol: 
+- Text encoder = SciBERT
+- Linear projection (adapter) + **layer normalization** (why?)
+- Graph encoder GCN d=3, input tokens = Morgan Fingerprint -> Mol2Vec radius 0 & 1.
+- Temperature ($exp (\tau)$)
+- Add some negatives samples. Unclear.
+- Transformer text decoder to focus on various parts of the graph.
