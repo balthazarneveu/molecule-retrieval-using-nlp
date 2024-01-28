@@ -238,6 +238,14 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         conf[ANNOTATIONS] += "- bigger GCN"
         conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
+    elif exp == 576:  # same as 575 but smaller hidden dim for the GCN
+        graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=128, graph_hidden_channels=512)
+        model, conf = lora_exp(conf, b=128, n=150, lr=3e-4, wd=0.1, model_name="scibert",
+                               graph_encoder=graph_encoder, quantization="nf4")
+        conf[SCHEDULER] = "ReduceLROnPlateau"
+        conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+        conf[ANNOTATIONS] += "- bigger GCN"
+        conf[NAME] = conf[NAME].replace("GCN", "biggerGCN")
 
     else:
         raise NameError(f"Experiment {exp} not implemented")
