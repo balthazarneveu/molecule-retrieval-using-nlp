@@ -67,8 +67,18 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             llm=DISTILBERT, graph=BIG_GCN,
             n=200,
             b=192, lr=3e-4, wd=1e-1,
-            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=5, factor=0.5),
             lora=False, quantization=None
         )
+    elif exp == 9007: #fais absolument n'imp
+        model, configuration = generic_experiment(
+            configuration,
+            llm=SCIBERT, graph=BIG_GCN,
+            n=200,
+            b=64, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=5, factor=0.5),
+            lora=False, quantization=None
+        )
+
     print(configuration)
     return model, configuration
