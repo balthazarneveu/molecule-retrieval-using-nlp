@@ -13,3 +13,4 @@ tqdm
 transformers
 tensorboard
 wandb
+networkx
