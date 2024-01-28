@@ -33,7 +33,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
             lora=False, quantization=None
         )
-    elif exp == 9002:
+    elif exp == 9002: #celle qui marche le mieux de loin
         model, configuration = generic_experiment(
             configuration,
             llm=DISTILBERT, graph=FAT_GCN,
@@ -77,6 +77,15 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             n=200,
             b=64, lr=3e-4, wd=1e-1,
             scheduler=PLATEAU, scheduler_configuration=dict(patience=5, factor=0.5),
+            lora=False, quantization=None
+        )
+    elif exp == 9008: #celle qui marche le mieux de loin
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=200,
+            b=192, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
             lora=False, quantization=None
         )
 
