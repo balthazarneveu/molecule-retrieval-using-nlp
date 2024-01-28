@@ -224,7 +224,7 @@ def get_round_5_experience(exp: int, conf: dict, root_dir: Path = None, backup_r
         # Reuce validation batch size to avoid any issue
     elif exp == 574:  # try scibert +fat-gcn +scheduler plateau
         graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
-        model, conf = lora_exp(conf, b=196, n=150, lr=3e-4, wd=0.1, model_name="scibert",
+        model, conf = lora_exp(conf, b=128, n=150, lr=3e-4, wd=0.1, model_name="scibert",
                                graph_encoder=graph_encoder, quantization="nf4")
         conf[SCHEDULER] = "ReduceLROnPlateau"
         conf[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
