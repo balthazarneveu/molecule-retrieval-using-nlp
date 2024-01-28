@@ -1,7 +1,7 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, OPTIMIZER, SCHEDULER, SCHEDULER_CONFIGURATION,
     TRAIN, VALIDATION, DATA_DIR, MAX_STEP_PER_EPOCH, ROOT_DIR,
-    TOKENIZER_NAME
+    TOKENIZER_NAME, LOSS, LOSS_NORM
 )
 from data_dumps import Dump
 from torch_geometric.data import DataLoader
@@ -15,7 +15,7 @@ from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts, LambdaLR
-from loss import contrastive_loss, tempered_contrastive_loss
+from loss import contrastive_loss, tempered_contrastive_loss,contrastive_loss_norm 
 from tqdm import tqdm
 import logging
 from typing import Optional, Tuple
@@ -29,7 +29,8 @@ def train(
         max_count: Optional[int] = None,
         print_freq: Optional[int] = 50, device: Optional[str] = 'cuda',
         writer: Optional[SummaryWriter] = None,
-        scheduler=None
+        scheduler=None,
+        embed_norm_loss=False
 ) -> Tuple[torch.nn.Module, list]:
     """
     Trains the model for one epoch and returns the trained model and a list of losses for each batch.
@@ -76,7 +77,10 @@ def train(
             current_loss = tempered_contrastive_loss(x_graph, x_text, model.temperature)
             logging.debug(f"temp: {model.temperature.item():.4f}")
         else:
-            current_loss = contrastive_loss(x_graph, x_text)
+            if embed_norm_loss:
+                current_loss= contrastive_loss_norm(x_graph, x_text)
+            else:
+                current_loss = contrastive_loss(x_graph, x_text)
         optimizer.zero_grad()
         current_loss.backward()
         optimizer.step()
@@ -121,6 +125,11 @@ def training(
     gt = np.load(DATA_DIR/"token_embedding_dict.npy", allow_pickle=True)[()]
 
     nb_epochs = configuration[NB_EPOCHS]
+    if configuration[LOSS_NORM]=="embed_norm_loss":
+        embed_norm_loss=True
+    else:
+        embed_norm_loss=False
+    print('embed_norm_loss:',embed_norm_loss)
     batch_size = configuration[BATCH_SIZE]
     val_dataset = GraphTextDataset(root=DATA_DIR, gt=gt, split=VALIDATION[:3], tokenizer=tokenizer,
                                    specific_name=configuration[TOKENIZER_NAME])
@@ -158,7 +167,7 @@ def training(
         epoch_losses = [0]
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
                                     max_count=max_count, print_freq=print_freq, device=device,
-                                    writer=writer_tra, scheduler=scheduler)
+                                    writer=writer_tra, scheduler=scheduler,embed_norm_loss=embed_norm_loss)
         all_losses.extend(epoch_losses)
         model.eval()
         if "cuda" in device:
