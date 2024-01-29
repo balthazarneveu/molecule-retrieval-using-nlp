@@ -15,7 +15,7 @@ from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts, LambdaLR
-from loss import contrastive_loss
+from loss import contrastive_loss, negative_sampling_contrastive_loss
 from tqdm import tqdm
 import logging
 from typing import Optional, Tuple
@@ -29,7 +29,7 @@ def train(
         max_count: Optional[int] = None,
         print_freq: Optional[int] = 50, device: Optional[str] = 'cuda',
         writer: Optional[SummaryWriter] = None,
-        scheduler=None
+        scheduler=None, #negative_loss=False
 ) -> Tuple[torch.nn.Module, list]:
     """
     Trains the model for one epoch and returns the trained model and a list of losses for each batch.
@@ -72,6 +72,9 @@ def train(
                                 attention_mask.to(device))
         if x_text.dtype == torch.float16:
             x_graph = x_graph.half()
+        #if negative_loss:
+        #    current_loss=negative_sampling_contrastive_loss(x_graph,x_text)
+        #else:
         current_loss = contrastive_loss(x_graph, x_text)
         optimizer.zero_grad()
         current_loss.backward()
