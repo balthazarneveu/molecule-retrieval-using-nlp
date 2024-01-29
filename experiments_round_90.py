@@ -88,6 +88,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
             lora=False, quantization=None
         )
+        configuration[BATCH_SIZE] = (configuration[BATCH_SIZE][0], 32,32)
 
     print(configuration)
     return model, configuration
