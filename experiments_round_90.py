@@ -85,7 +85,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             llm=DISTILBERT, graph=BIG_GCN,
             n=300, # new bigger batch size, relancer xp
             b=164, lr=3e-4, wd=1e-1,
-            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE]=(164,32,32)
@@ -94,12 +94,12 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
         model, configuration = generic_experiment(
             configuration,
             llm=DISTILBERT, graph=FAT_GCN,
-            n=300, # new bigger batch size, relancer xp
-            b=164, lr=3e-4, wd=1e-1,
-            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            n=200, # new bigger batch size, relancer xp
+            b=128, lr=3e-4, wd=1e-1, # smaller batch size??
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
             lora=False, quantization=None
         )
-        configuration[BATCH_SIZE]=(164,32,32)
+        configuration[BATCH_SIZE]=(128,32,32)
 
     print(configuration)
     return model, configuration
