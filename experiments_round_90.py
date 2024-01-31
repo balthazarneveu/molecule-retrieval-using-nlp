@@ -1,6 +1,6 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, LEARNING_RATE, TOKENIZER_NAME, NAME, ANNOTATIONS, WEIGHT_DECAY, OPTIMIZER,
-    DISTILBERT, BIG_GCN,
+    DISTILBERT, SCIBERT, BIG_GCN, FAT_GCN,
     PLATEAU
 )
 from pathlib import Path
@@ -33,5 +33,104 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
             lora=False, quantization=None
         )
+    elif exp == 9002:  # celle qui marche le mieux de loin
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=FAT_GCN,
+            n=200,
+            b=128, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            lora=False, quantization=None
+        )
+    elif exp == 9003:
+        model, configuration = generic_experiment(
+            configuration,
+            llm=SCIBERT, graph=FAT_GCN,
+            n=200,
+            b=64, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            lora=False, quantization=None
+        )
+    elif exp == 9005:  # fais aussi un out of memory
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=FAT_GCN,
+            n=200,
+            b=192, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            lora=False, quantization=None
+        )
+
+    elif exp == 9006:  # fais aussi un out of memory
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=200,
+            b=192, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=5, factor=0.5),
+            lora=False, quantization=None
+        )
+    elif exp == 9007:  # fais absolument n'imp
+        model, configuration = generic_experiment(
+            configuration,
+            llm=SCIBERT, graph=BIG_GCN,
+            n=200,
+            b=64, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=5, factor=0.5),
+            lora=False, quantization=None
+        )
+    elif exp == 9008:  # celle qui marche le mieux de loin
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=300,  # new bigger batch size, relancer xp
+            b=164, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False, quantization=None
+        )
+        configuration[BATCH_SIZE] = (164, 32, 32)
+
+    elif exp == 9009:  # celle qui marche le mieux de loin
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=FAT_GCN,
+            n=200,  # new bigger batch size, relancer xp
+            b=128, lr=3e-4, wd=1e-1,  # smaller batch size??
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False, quantization=None
+        )
+        configuration[BATCH_SIZE] = (128, 32, 32)
+
+    elif exp == 9010:  # 9009 bigger batch size
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=FAT_GCN,
+            n=200,  # new bigger batch size, relancer xp
+            b=144, lr=3e-4, wd=1e-1,  # smaller batch size??
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False, quantization=None
+        )
+        configuration[BATCH_SIZE] = (144, 32, 32)
+    elif exp == 9011:  # big gcn and bigger batch size
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=300,  # new bigger batch size, relancer xp
+            b=180, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False, quantization=None
+        )
+        configuration[BATCH_SIZE] = (180, 32, 32)
+
+    elif exp == 9080:  # benchmark with exp 9090 and the new loss
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=200,  # new bigger batch size, relancer xp
+            b=32, lr=3e-4, wd=1e-1,  # smaller batch size??
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False, quantization=None
+        )
+
     print(configuration)
     return model, configuration
