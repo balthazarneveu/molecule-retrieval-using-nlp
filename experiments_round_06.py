@@ -8,6 +8,7 @@ from properties import OUT_DIR
 from experiments_generic import generic_experiment, custom_lr
 from functools import partial
 import torch
+from huggingface_hub import hf_hub_download
 
 
 def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None, backup_root: Path = None):
@@ -45,18 +46,27 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
         configuration[LOSS] = "Tempered"
-    elif exp == 603:
+    elif exp == 603 or exp == 604:
         # 573
         lr = 4e-4
+        if exp == 603:
+            batch_size = 256
+            n = 200
+        elif exp == 604:
+            batch_size = 600
+            n = 65
         model, configuration = generic_experiment(
             configuration,
             llm=SCIBERT, graph=FAT_GCN,
-            n=200,
-            b=256, lr=lr, wd=1e-1,
+            n=n,
+            b=batch_size, lr=lr, wd=1e-1,
             lora=True, quantization=None,
             temperature=False,
         )
-        reload_model = OUT_DIR/"0573_LoraSciBERT-FatGCN"/"model_0145.pt"
+        REPO_ID = "balthou/molnlp_0573_LoraSciBERT_FatGCN"
+        FILENAME = "model_0145.pt"
+        reload_model = hf_hub_download(repo_id=REPO_ID, filename=FILENAME, cache_dir=OUT_DIR)
+        # reload_model = OUT_DIR/"0573_LoraSciBERT-FatGCN"/"model_0145.pt"
         model.load_state_dict(torch.load(reload_model)["model_state_dict"])
         for param in model.text_encoder.bert.parameters():
             param.requires_grad = False
