@@ -74,7 +74,7 @@ def train(
             x_graph = x_graph.half()
         #current_loss = contrastive_loss(x_graph, x_text)
         #implement with the new loss instead
-        current_loss=negative_sampling_contrastive_loss(x_graph,x_text)
+        current_loss,_=negative_sampling_contrastive_loss(x_graph,x_text)
         optimizer.zero_grad()
         current_loss.backward()
         optimizer.step()

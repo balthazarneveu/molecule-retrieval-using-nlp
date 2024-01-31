@@ -90,7 +90,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
         )
         configuration[BATCH_SIZE] = (192, 32,32)
     #first experiment to be trained with the new loss
-    elif exp=9100:
+    elif exp==9090:
         model, configuration = generic_experiment(
             configuration,
             llm=DISTILBERT, graph=BIG_GCN,
