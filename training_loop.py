@@ -15,7 +15,7 @@ from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts, LambdaLR
-from loss import contrastive_loss
+from loss import contrastive_loss, negative_sampling_contrastive_loss
 from tqdm import tqdm
 import logging
 from typing import Optional, Tuple
@@ -72,7 +72,9 @@ def train(
                                 attention_mask.to(device))
         if x_text.dtype == torch.float16:
             x_graph = x_graph.half()
-        current_loss = contrastive_loss(x_graph, x_text)
+        #current_loss = contrastive_loss(x_graph, x_text)
+        #implement with the new loss instead
+        current_loss=negative_sampling_contrastive_loss(x_graph,x_text)
         optimizer.zero_grad()
         current_loss.backward()
         optimizer.step()

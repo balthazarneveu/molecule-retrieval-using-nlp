@@ -89,6 +89,19 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE] = (192, 32,32)
+    #first experiment to be trained with the new loss
+    elif exp=9100:
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=100,
+            b=32, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.8),
+            lora=False, quantization=None
+        )
+
+
+
 
     print(configuration)
     return model, configuration
