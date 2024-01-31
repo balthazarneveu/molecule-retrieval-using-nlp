@@ -211,7 +211,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
             nhid=300, graph_hidden_channels=300)
     if exp == 19: #18 with more epochs and bigger batch size
         configuration[BATCH_SIZE] = (64, 32, 32)    
-        configuration[NB_EPOCHS] = 100
+        configuration[NB_EPOCHS] = 150
         configuration[OPTIMIZER][LEARNING_RATE] = 1e-4
         configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
         configuration[NAME] = 'Baseline-BERT-GCN'
