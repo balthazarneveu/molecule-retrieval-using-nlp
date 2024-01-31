@@ -62,6 +62,7 @@ def evaluation(
         best_model_path = sorted(list(backup_folder.glob("*.pt")))
     assert len(best_model_path) > 0, f"No model checkpoint found at {model_path}"
     best_model_path = best_model_path[-1]
+    print(best_model_path)
     checkpoint = torch.load(best_model_path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
@@ -90,6 +91,10 @@ def evaluation(
                                      attention_mask=batch['attention_mask'].to(device)):
                 text_embeddings.append(output.tolist())
 
+        save_embeddings_graph_files = submission_csv_file.parent/'graph_embeddings.npy'
+        save_embeddings_text_files = submission_csv_file.parent/'text_embeddings.npy'
+        np.save(save_embeddings_graph_files, np.array(graph_embeddings))
+        np.save(save_embeddings_text_files, np.array(text_embeddings))
         similarity = cosine_similarity(text_embeddings, graph_embeddings)
 
         solution = pd.DataFrame(similarity)
