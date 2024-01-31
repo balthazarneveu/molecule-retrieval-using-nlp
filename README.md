@@ -141,3 +141,35 @@ kaggle competitions submit -c altegrad-2023-data-challenge -f __output/X/submiss
 - Temperature ($exp (\tau)$)
 - Add some negatives samples. Unclear.
 - Transformer text decoder to focus on various parts of the graph.
+
+
+
+### Saving some time
+:fire: LORA SciBERT + :fire: FatGCN - `batch_size=8`
+```
+Device 1 [NVIDIA T500]                         PCIe GEN 3@ 4x RX: 20.51 MiB/s TX: 7.812 MiB/s
+ GPU 1635MHz MEM 5000MHz TEMP  72°C FAN N/A% POW N/A W
+ GPU[||||||||||||||||||||||||||||||||||||| 90%] MEM[||||||||||||||||||||||||||2.951Gi/4.000Gi]
+```
+
+:snowflake: LORA SciBERT + :fire: FatGCN  `batch_size=8`
+```
+Device 1 [NVIDIA T500]                         PCIe GEN 3@ 4x RX: 24.41 MiB/s TX: 7.812 MiB/s
+ GPU 1455MHz MEM 5000MHz TEMP  75°C FAN N/A% POW N/A W
+ GPU[||||||||||||||||||||||||||||||||||||| 91%] MEM[|||||||||                 0.913Gi/4.000Gi]
+```
+
+:snowflake: LORA SciBERT + :fire: FatGCN  `batch_size=32`
+```
+Device 1 [NVIDIA T500]                         PCIe GEN 3@ 4x RX: 19.53 MiB/s TX: 6.836 MiB/s
+ GPU 1710MHz MEM 5000MHz TEMP  66°C FAN N/A% POW N/A W
+ GPU[|||||||||||||||||||||||||||||||||||||100%] MEM[|||||||||||||             1.290Gi/4.000Gi]
+```
+
+
+:snowflake: LORA SciBERT + :fire: FatGCN  `batch_size=128`
+```
+Device 1 [NVIDIA T500]                         PCIe GEN 3@ 4x RX: 24.41 MiB/s TX: 8.789 MiB/s
+ GPU 1725MHz MEM 5000MHz TEMP  79°C FAN N/A% POW N/A W
+ GPU[|||||||||||||||||||||||||||||||||||||100%] MEM[||||||||||||||||||||||||||2.974Gi/4.000Gi]
+```
