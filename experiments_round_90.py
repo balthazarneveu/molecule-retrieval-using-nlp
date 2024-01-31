@@ -120,7 +120,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
             lora=False, quantization=None
         )
-        configuration[BATCH_SIZE]=(190,32,32)
+        configuration[BATCH_SIZE]=(180,32,32)
 
 
     elif exp==9080: #benchmark with exp 9090 and the new loss
