@@ -111,6 +111,16 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE]=(144,32,32)
+    elif exp == 9011: #big gcn and bigger batch size
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=300, # new bigger batch size, relancer xp
+            b=180, lr=3e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False, quantization=None
+        )
+        configuration[BATCH_SIZE]=(190,32,32)
 
 
     elif exp==9080: #benchmark with exp 9090 and the new loss
@@ -122,6 +132,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.5),
             lora=False, quantization=None
         )
+
         
 
 
