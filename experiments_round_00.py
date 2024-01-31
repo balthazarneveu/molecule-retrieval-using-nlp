@@ -219,6 +219,16 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         model = BaselineModel(
             model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
             nhid=300, graph_hidden_channels=300)
+    if exp == 20: # with more epochs and bigger batch size
+        configuration[BATCH_SIZE] = (128, 32, 32)    
+        configuration[NB_EPOCHS] = 150
+        configuration[OPTIMIZER][LEARNING_RATE] = 1e-4
+        configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
+        configuration[NAME] = 'Baseline-BERT-GCN'
+        configuration[ANNOTATIONS] = 'Baseline - provided by organizers'
+        model = BaselineModel(
+            model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
+            nhid=300, graph_hidden_channels=300)
 
     if exp >= 30 and exp < 60:
         model, configuration = get_best_pretrained_model(configuration, root_dir, backup_root)
