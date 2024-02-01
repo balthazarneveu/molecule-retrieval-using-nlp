@@ -1,3 +1,29 @@
-\section{Discussion on the Paper}
+\section{Discussion}
 \label{sec:discussion}
-Discussion
+
+\subsection*{Improvement ideas}
+\label{sec:unexplored_ideas}
+We have a few ideas that we didn't have time to explore or fully try out but that we think could be interesting to try out.
+
+\subsubsection*{Increasing batch size}
+\textbf{Alternating gradient descent between models}\textit{(Idea, Not explored)}. As the LLM and the GNN model are trained jointly, all parameters and optimizer parameters need to be kept in GPU memory. We could try to alternate between training only the LLM while freezing the graph model for a few steps (we would not expect the LLM to change much anyway), then move back the parameters to CPU and alternate with training the GNN model. This would potentially allow to increase the batch size further (you may have to start from a pretrained baseline).
+
+\textbf{Freezing the LLM, training a large GCN from scratch} \textit{Not fully explored}
+We have experimented with the following idea. Train jointly a decent model with a correct batch size. We assume that the LLM is able to create text features which are relevant to our molecule corpus so its weights can now be frozen which reduces a lot the GPU memory used during training. From this point, you can train a larger GCN from scratch (or fine tune your pre-existing one with bigger batch sizes, see table ~\ref{table:ft_gcn_model_memory_occupancy}). Unfortunately, this idea did not lead to satisfactory results.
+
+\begin{table*}[ht]
+    \centering
+    \begin{tabular}{ccccc}
+    \hline
+    \textbf{LLM} & \textbf{Batch Size} \textbf{GPU Utilization}& \textbf{GPU Memory Occupancy} \\ \hline
+    Trainable & 8 & 90\% & 2.95 GB \\
+    Frozen & 8 & 91\% & 0.913 GB \\
+    Frozen & 32 & 100\% & 1.29 GB \\
+    Frozen & 128 & 100\% & 2.97 GB \\
+    \hline
+    \end{tabular}
+    \caption{Comparison of memory occupancy for different model configurations on NVIDIA T500 with 4GB of GPU Memory. GCN Model is the FatGCN. LLM is a SciBERT model that we trained from scratch with LORA. This allows putting much larger batch sizes in the GCN model (from batches of size 8 when training LLM and GCN jointly to 128 - please note that the trainable LLM memory in the first row is already reduced a lot by using LoRA compared to traing all parameters at once).}
+    \label{table:ft_gcn_model_memory_occupancy}
+\end{table*}
+
+    
