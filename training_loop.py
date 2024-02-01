@@ -29,7 +29,8 @@ def train(
         max_count: Optional[int] = None,
         print_freq: Optional[int] = 50, device: Optional[str] = 'cuda',
         writer: Optional[SummaryWriter] = None,
-        scheduler=None
+        scheduler=None,
+        scaler: torch.cuda.amp.GradScaler = None
 ) -> Tuple[torch.nn.Module, list]:
     """
     Trains the model for one epoch and returns the trained model and a list of losses for each batch.
@@ -66,20 +67,23 @@ def train(
         attention_mask = batch.attention_mask
         batch.pop('attention_mask')
         graph_batch = batch
+        # if scaler is None:
+        with torch.autocast(device_type=device, dtype=torch.float16, enabled=scaler.is_enabled()):
+            x_graph, x_text = model(graph_batch.to(device),
+                                    input_ids.to(device),
+                                    attention_mask.to(device))
+            if x_text.dtype == torch.float16:
+                x_graph = x_graph.half()
+            if hasattr(model, "temperature"):
+                current_loss = tempered_contrastive_loss(x_graph, x_text, model.temperature)
+                logging.debug(f"temp: {model.temperature.item():.4f}")
+            else:
+                current_loss = contrastive_loss(x_graph, x_text)
 
-        x_graph, x_text = model(graph_batch.to(device),
-                                input_ids.to(device),
-                                attention_mask.to(device))
-        if x_text.dtype == torch.float16:
-            x_graph = x_graph.half()
-        if hasattr(model, "temperature"):
-            current_loss = tempered_contrastive_loss(x_graph, x_text, model.temperature)
-            logging.debug(f"temp: {model.temperature.item():.4f}")
-        else:
-            current_loss = contrastive_loss(x_graph, x_text)
+        scaler.scale(current_loss).backward()  # current_loss.backward()
+        scaler.step(optimizer)  # optimizer.step()
+        scaler.update()
         optimizer.zero_grad()
-        current_loss.backward()
-        optimizer.step()
         if scheduler is not None and isinstance(scheduler, CosineAnnealingWarmRestarts) or isinstance(scheduler, LambdaLR):
             scheduler.step(epoch + batch_idx / total_batches)  # update learning rate inside of an epoch
 
@@ -152,13 +156,15 @@ def training(
             scheduler = LambdaLR(optimizer, **scheduler_config)
         else:
             raise NameError(f"Scheduler {configuration[SCHEDULER]} not implemented")
+    use_amp = configuration.get("use_amp", False)
+    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
     for epoch in range(nb_epochs):
         if "cuda" in device:
             torch.cuda.empty_cache()
         epoch_losses = [0]
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
                                     max_count=max_count, print_freq=print_freq, device=device,
-                                    writer=writer_tra, scheduler=scheduler)
+                                    writer=writer_tra, scheduler=scheduler, scaler=scaler)
         all_losses.extend(epoch_losses)
         model.eval()
         if "cuda" in device:
