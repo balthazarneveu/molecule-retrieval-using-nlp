@@ -14,7 +14,7 @@ from huggingface_hub import hf_hub_download
 
 def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None, backup_root: Path = None):
     """"""
-    assert exp >= 600 and exp < 699, f"Experiment {exp} is not in the round 90"
+    assert exp >= 600 and exp < 699, f"Experiment {exp} is not in the round 6"
     # configuration["max_step_per_epoch"] = 5
     if exp == 600:
         lr = 4e-4

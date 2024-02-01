@@ -10,6 +10,7 @@ from experiments_round_02 import get_round_2_experience
 from experiments_round_04 import get_round_4_experience
 from experiments_round_05 import get_round_5_experience
 from experiments_round_06 import get_round_6_experience
+from experiments_round_07 import get_round_7_experience
 from experiments_round_80 import get_round_80_experience
 from experiments_round_90 import get_round_90_experience
 from typing import Tuple
@@ -48,6 +49,8 @@ def get_experience(exp: int, root_dir: Path = None, backup_root: Path = None) ->
         get_exp = get_round_5_experience
     elif exp >= 600 and exp <= 699:
         get_exp = get_round_6_experience
+    elif exp >= 700 and exp <= 799:
+        get_exp = get_round_7_experience
     elif exp >= 8000 and exp <= 8999:
         get_exp = get_round_80_experience
     elif exp >= 9000 and exp <= 9999:
