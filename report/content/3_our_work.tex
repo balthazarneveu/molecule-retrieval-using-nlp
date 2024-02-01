@@ -1,2 +1,18 @@
 \section{Implementation Strategy}
 \label{sec:remplementation}
+\subsection*{Methodology}
+\label{sec:methodology}
+As this work was to  be done in group, we have to develop a framework so everyone could work and share their code independently.
+\begin{itemize}
+    \item Heterogeneous environments: several operating systems (linux, windows, macOS), various platforms (local laptop training, Kaggle Kernels notebook, remote machines at Ecole Polytechnique). On every platform, data has to be acessible and experiments results have to be stored in a way they can be retrieved. We used the Kaggle dataset feature to  host the raw dataset aswell as the preprocessed data.
+    \item Privacy: as not sharing code was among the rules of the challenge, our source code remained private on GitHub (\textit{which made cloning operations even trickier when using Kaggle kernels}).
+    \item Reproducibility: all our experiments are reproducible (source code tracking under git, local and cloud storage of experiments results using ~\href{https://wandb.ai/molecule-nlp-altegrad-23/molecule-nlp}{Weights and biases}).
+\end{itemize}
+An experiment is defined by a unique identifier and the instanciation of a model (tokenization method, architecture of the LLM and GNN), the configuration of an  optimizer and training hyper parameters. At inference time, we're using this unique identifier so we can safely instantiate a network and reload the weights (\textit{trained model are by construction compatible with inference. This avoids the risk of having a `.pth` weight file without knowning which architecture to use to reload it.}).
+We wrote a framework which takes and solves all these constraints at once and allows to focus on training models.
+
+
+\subsection*{Training conditions}
+\label{sec:training conditions}
+To setup the training loop, we started on a single NVIDIA GeForce RTX 2080 GPU with 6Gb of RAM. This was enough to make sure we could train.
+
