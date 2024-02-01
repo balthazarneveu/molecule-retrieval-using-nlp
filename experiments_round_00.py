@@ -229,7 +229,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
         model = BaselineModel(
             model_name=configuration[TOKENIZER_NAME], num_node_features=300, nout=768,
             nhid=300, graph_hidden_channels=300)
-    f exp == 21: # with more epochs and bigger batch size
+    if exp == 21: # with more epochs and bigger batch size
         configuration[BATCH_SIZE] = (164, 32, 32)    
         configuration[NB_EPOCHS] = 180
         configuration[OPTIMIZER][LEARNING_RATE] = 1e-4
