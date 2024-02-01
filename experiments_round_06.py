@@ -1,7 +1,7 @@
 from properties import (
     SCHEDULER, SCHEDULER_CONFIGURATION,
     DISTILBERT, SCIBERT, BIG_GCN, FAT_GCN, PLATEAU,
-    LOSS, NAME
+    LOSS, NAME, BATCH_SIZE
 )
 from pathlib import Path
 from properties import OUT_DIR
@@ -99,5 +99,26 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         configuration[NAME] += " Pretrained on 573"
+
+    elif exp == 630:
+        # 9009 Lea competition of loss
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT,
+            graph=FAT_GCN,
+            n=200,
+            b=128,
+            lr=5e-4,
+            wd=1e-1,
+            scheduler=PLATEAU,
+            scheduler_configuration=dict(patience=8, factor=0.5),
+            lora=False,
+            quantization=None,
+            temperature=True
+        )
+        configuration[BATCH_SIZE] = (128, 32, 32)
+        configuration[SCHEDULER] = "ReduceLROnPlateau"
+        configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
+        configuration[LOSS] = "Tempered"
     print(configuration)
     return model, configuration
