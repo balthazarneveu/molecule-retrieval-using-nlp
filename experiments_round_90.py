@@ -153,6 +153,16 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE] = (64, 32,32)
+    elif exp == 9076: #9070 smaller lr
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=300,
+            b=128, lr=5e-5, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.9),
+            lora=False, quantization=None
+        )
+        configuration[BATCH_SIZE] = (128, 32,32)
 
 
     #first experiment to be trained with the new loss
