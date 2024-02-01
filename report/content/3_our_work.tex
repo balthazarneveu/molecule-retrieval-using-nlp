@@ -14,21 +14,29 @@ We wrote a framework which takes and solves all these constraints at once and al
 
 \subsection*{Training conditions}
 \label{sec:training conditions}
-To setup the training loop, we started on a single NVIDIA GeForce RTX 2080 GPU with 6Gb of RAM. This was enough to make sure we could train.
+To setup the training loop, we started on a single NVIDIA GeForce RTX 2080 GPU with 6Gb of RAM. This was enough to make sure we could train, track and monitor progress of all our experiments.
 
 
+\begin{table*}[ht]
+    \centering
+    \begin{tabular}{lcccc}
+    \hline
+    \textbf{Feature} & \textbf{Nvidia T500} & \textbf{Nvidia RTX 2060} & \textbf{Nvidia K100} & \textbf{Nvidia A4000} \\ \hline
+    Location            & local laptop           & local laptop  & Kaggle  & Ecole Polytechnique  \\
+    Access & direct & direct & Kaggle Kernels & SSH \\
+    Dataset access & local SSD & local SSD & Kaggle dataset & remote download + SSD drives\\ 
+    Memory           & 4 GB                        & 6 GB                           & 16 GB                          & 24 GB                          \\
+    \hline
+    \end{tabular}
+    \caption{Comparison of the GPUs which were used during training}
+    \label{table:gpu_comparison}
+\end{table*}
+
+
+\pagebreak
 
 \subsection*{Preliminary study}
 \label{sec:preliminary study}
-We first started with by simple models based on the base GCN (3 graph convolution layers followed by a global pooling layer and 2 layers MLP). Instead of fine tuning all parameter, we first started by freezing the LLM parameters. Although simple, this idea intuivitely has many advantages for traing:
-\begin{itemize}
-    \item We discard the huge memory cost of training a LLM (memory issues not only come from storing the weigths on the GPU but all the optimizers variables during backpropagation). The idea could have been pushed further by pre-computing the text embeddings and storing them on disk. 
-    \item Intuivitely, freezing the LLM parameters should make the training more stable as the LLM embeddings acts as a kind of anchor that the GNN shall match.
-\end{itemize}
-Unfortunately, training achieves low accuracy although the number of parameters to train is lightweight. We added an "adapter" module which is simply a MLP which will adapt by projecting the text represention into a more adapted space which can match with the graph.
-We also browsed Hugging Face to find models that could be dedicated to scientific-specific language processing. The Sci-Bert\cite{scibert} model improvements were two-fold during this preliminary study: a tokenizer dedicated to a scientific corpus is by nature more suited for scientific texts... here atom and molecule names.
-
-Increasing the GNN size improves accuracy.
 
 \begin{table*}[h]
     \centering
@@ -47,9 +55,41 @@ Increasing the GNN size improves accuracy.
     \label{tab:preliminary_study_metrics}
 \end{table*}
 
-\begin{figure*}
+
+We start with a few toy experiments to see which architecture factors are most promising (initial hope is that the performances will scale accordingly when we add all extra machine learning tricks).
+\textbf{Frozen LLM weights}: We first started with by simple models based on the base GCN (3 graph convolution layers followed by a global pooling layer and 2 layers MLP). Instead of fine tuning all parameters of the LLM, we first started by freezing the LLM parameters. Although simple, this idea intuivitely has many advantages for traing:
+\begin{itemize}
+    \item We discard the huge memory cost of training a LLM (memory issues not only come from storing the weigths on the GPU but all the optimizers variables during backpropagation). The idea could have been pushed further by pre-computing the text embeddings and storing them on disk. 
+    \item Intuivitely, freezing the LLM parameters should make the training more stable as the LLM embeddings acts as a kind of anchor that the GNN shall match.
+\end{itemize}
+Unfortunately, training achieves low accuracy although the number of parameters to train is lightweight. We added an "adapter" module which is simply a MLP which will adapt by projecting the text representations into a more adapted space which can match with the graph.
+\textbf{Influence of the graph neural network size}: We pursued our explorations to see the impact of the GNN size. The \textbf{big GCN} (5 graph convolution layers with 2 residual connection) is more complex and has more parameters to train. We can see that the accuracy is improved by increasing the GCN size. 
+\begin{itemize}
+    \item Using frozen Distil-BERT: from experiment 106 (base GCN $\text{LRAP}=26.8\%$) to 114 - (big GCN $\text{LRAP}=31.6\%$)
+    \item Using frozen SciBERT: from experiment 102 (base GCN $\text{LRAP}=36.7\%$) to 113 - (big GCN $\text{LRAP}=39.8\%$)
+\end{itemize}
+
+
+\textbf{Influence of the pretrained language model}: We also browsed Hugging Face to find models that could be dedicated to scientific-specific language processing. We foud the Sci-Bert\cite{scibert} model and could use it as a drop-in replacement for the Distil-Bert baseline model. Improvements were two-fold when changing the pretrained LLM during this preliminary study: a tokenizer dedicated to a scientific corpus seems by nature a natural choice for scientific words...here atoms and molecule names not being too frequent in common language. The Sci-Bert model may also have reasoning capabilities closer to science and chemistry reactions. This was translated by a improvement in performances. Increasing the GNN size improves accuracy.
+\begin{itemize}
+    \item Using the Base GCN : from experiment 106 Distil-BERT ($\text{LRAP}=26.8\%$) to experiment 112 - SciBert ($\text{LRAP}=36.7\%$).
+    \item Using the Big-GCN: from experiment 114 Distil-BERT ($\text{LRAP}=31.6\%$) to experiment 113 - SciBert ($\text{LRAP}=39.8\%$).
+\end{itemize}
+The capacity of the network (same number of parameters) being fixed between these two experiments, it proves that the SciBERT tokenization and pretraining is definitely more suited for our task. We'd hope that this $seq 8\%$ LRAP improvement would be translated when training a fully trainable LLM.
+
+Unfortunately we later conducted larger experiments with fully trainable LLM (starting from the pretrained weights) and the performances differences were not as good as expected. Using the Base GCN : from experiment 65 Distil-BERT ($\text{LRAP}=63.5\%$) to experiment 400 - SciBert ($\text{LRAP}=66\%$), there's not that $seq 8\%$ LRAP improvement that we had seen earler. Furthermore, it's hard to tell whether the 2.5\% improvement is due to the SciBert model pretraining being more suited for our task or the fact that the model has nearly twice as many trainable parameters than the Distil-BERT. 
+
+This preliminary study gave us guidance that using a larger GCN and using SciBERT pretrained weights and tokenizer were good trends to follow to try improving our results. The pitfall is that fine tuning SciBERT comes with a bigger memory footprint than Distil-BERT which requires diminishing batch sizes for a fixed GPU (and as stated in the CLIP paper, large batch size seems to be one key factor of the success of contrastive learning). Experiments 65 and 400 have been cautiousy trained with batches of size 32 and same hyperparameters to get comparable results: 
+\begin{itemize}
+    \item the SciBERT experiment 400 was only possible using a NVIDIA RTX A4000 with 24Gb of RAM \item the Distil-BERT experiment 65 was possible on a NVIDIA Tesla T100 with 16Gb of RAM (Kaggle Kernels notebook).
+\end{itemize}
+
+
+
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=1.\textwidth]{figures/preliminary_study.png}
     \caption{Training curves for the preliminary study.}
     \label{fig:preliminary_study_curves}
 \end{figure*}
+
