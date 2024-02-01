@@ -129,3 +129,14 @@ This preliminary study gave us guidance that using a larger GCN and using SciBER
     \label{fig:preliminary_study_curves}
 \end{figure*}
 
+
+
+\subsection*{Our model}
+\label{sec:our model}
+We train several models.
+
+\color{red}TODO - batch size, scheduler, hyperparams, GPU memory occupancy, archi, LRAP \color{black}
+
+\color{red}TODO - Training curves side by side with LR \color{black}
+
+An ensembling technique is later used to average the scores of each model which leads to an extra accuracy improvement as suggested in \cite{text2mol}. (average submission csv for experiments 9008 and 9009 basically, a trick which has no extra cost and allows taking more confident desisions).

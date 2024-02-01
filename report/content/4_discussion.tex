@@ -6,6 +6,8 @@
 We have a few ideas that we didn't have time to explore or fully try out but that we think could be interesting to try out.
 
 \subsubsection*{Increasing batch size}
+\label{sec:increase_batch_size}
+
 \textbf{Alternating gradient descent between models}\textit{(Idea, Not explored)}. As the LLM and the GNN model are trained jointly, all parameters and optimizer parameters need to be kept in GPU memory. We could try to alternate between training only the LLM while freezing the graph model for a few steps (we would not expect the LLM to change much anyway), then move back the parameters to CPU and alternate with training the GNN model. This would potentially allow to increase the batch size further (you may have to start from a pretrained baseline).
 
 \textbf{Freezing the LLM, training a large GCN from scratch} \textit{Not fully explored}
@@ -26,4 +28,12 @@ We have experimented with the following idea. Train jointly a decent model with 
     \label{table:ft_gcn_model_memory_occupancy}
 \end{table*}
 
-    
+\subsubsection*{Pretraining LLLM on the text corpus}
+We could have fined tuned the LLM on the text corpus in a masked language modeling task. This would have allowed to have a better understanding of the text corpus and potentially better text embeddings. This could either have been incorporated as a pre-training step or as an auxiliary task to the contrastive learning task(additional loss for masked language learning).
+
+\subsubsection*{Data augmentation}
+Graph molecules augmentations have been proposed in mol-ICLR \cite{molICLR}. CLIP \cite{CLIP} also used a vast amount of augmentations on images. We could have trimmed the sequence lengths, inverted a few words. Unsure if this would have helped but a future idea to be explored.
+\color{red}TODO - Describe data augmentation MolICLR\color{black}
+
+Since a lot of molecules are not paired with a text description, 
+\color{red}TODO - Check if we have the 100.000 graphs available!!!!!\color{black}
