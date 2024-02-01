@@ -33,6 +33,7 @@
   %% KEYWORDS
   \keywords{contrastive learning, graph neural networks, large language models}
 
+
   %% Teaser figure
   \begin{teaserfigure}
     \includegraphics[width=1.\textwidth]{figures/mol_text_overview.PNG}
@@ -44,6 +45,10 @@
   %% TITLE
   \maketitle
 
+
+  %% ABSTRACT
+
+This study aims at building powerful and consistent vector representions of text descriptions and molecules. The most direct use is a retrieval system for chemical compounds based on text descriptions (good representions can generally also be used for other downstream tasks). Recent advances in contrastive learning allow creating powerful representions for various modalities which can be embedded in a shared vector space. The embedding vectors of both the text description and the molecule shall be similar. We use a pretrained Large Language Model and a Graph Neural Network to create the embeddings. To get an accurate system, complexity mostly comes as an engineering challenge which we had to solve. 
 
   %% CONTENT
   \input{content/1_introduction.tex}
