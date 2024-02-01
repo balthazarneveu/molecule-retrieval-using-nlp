@@ -232,7 +232,7 @@ def get_baseline_experience(exp: int, configuration: dict, root_dir: Path = None
     if exp == 21: # with more epochs and bigger batch size
         configuration[BATCH_SIZE] = (164, 32, 32)    
         configuration[NB_EPOCHS] = 180
-        configuration[OPTIMIZER][LEARNING_RATE] = 1e-4
+        configuration[OPTIMIZER][LEARNING_RATE] = 3e-4
         configuration[OPTIMIZER][WEIGHT_DECAY] = 0.1
         configuration[NAME] = 'Baseline-BERT-GCN'
         configuration[ANNOTATIONS] = 'Baseline - provided by organizers'
