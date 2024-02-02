@@ -1,7 +1,7 @@
 from properties import (
     SCHEDULER, SCHEDULER_CONFIGURATION,
     DISTILBERT, SCIBERT, BIG_GCN, FAT_GCN, PLATEAU,
-    LOSS, NAME, BATCH_SIZE, LOSS_TEMPERED_CROSSENTROPY
+    LOSS, NAME, BATCH_SIZE, LOSS_TEMPERED_CROSSENTROPY, LOSS_BINARY_CROSSENTROPY
 )
 from pathlib import Path
 from properties import OUT_DIR
@@ -80,7 +80,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
         configuration[NAME] += " Pretrained on 573"
-    if exp == 610:
+    if exp == 610 or exp == 611:
         # 573 LLM
         lr = 1e-3
         batch_size = 128
@@ -101,6 +101,8 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
             param.requires_grad = False
         graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=512, graph_hidden_channels=512)
         model.graph_encoder = graph_encoder
+        if exp == 611:
+            configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         configuration[NAME] += " Pretrained on 573"
