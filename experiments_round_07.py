@@ -1,7 +1,7 @@
 from properties import (
     SCHEDULER, SCHEDULER_CONFIGURATION,
     DISTILBERT, SCIBERT, BIG_GCN, FAT_GCN, PLATEAU,
-    LOSS, NAME, BATCH_SIZE
+    LOSS, NAME, BATCH_SIZE, MAX_STEP_PER_EPOCH, LOSS_TEMPERED_CROSSENTROPY
 )
 from pathlib import Path
 from properties import OUT_DIR
@@ -44,5 +44,22 @@ def get_round_7_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
         # configuration[NAME] += " Pretrained on 9011"
         configuration[NAME] += " Pretrained on 9009"
+    elif exp == 701:
+        # configuration[MAX_STEP_PER_EPOCH] = 4
+        batch_size = 64
+        n = 300
+        lr = 1e-3
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT,
+            graph=BIG_GCN,
+            n=n,
+            b=batch_size, lr=lr, wd=1e-1,
+            lora=True,
+            # quantization="nf4",
+            temperature=True,
+        )
+        configuration[LOSS] = LOSS_TEMPERED_CROSSENTROPY
+        configuration["use_amp"] = True
     print(configuration)
     return model, configuration
