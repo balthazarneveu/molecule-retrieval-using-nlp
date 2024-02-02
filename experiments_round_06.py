@@ -84,6 +84,8 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         # 573 LLM
         lr = 1e-3
         batch_size = 128
+        if exp == 611:
+            batch_size = 192
         n = 200
         model, configuration = generic_experiment(
             configuration,
