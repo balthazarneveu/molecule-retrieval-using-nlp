@@ -46,8 +46,8 @@ def get_round_7_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[NAME] += " Pretrained on 9009"
     elif exp == 701:
         # configuration[MAX_STEP_PER_EPOCH] = 4
-        batch_size = 64
-        n = 300
+        batch_size = 128
+        n = 65
         lr = 1e-3
         model, configuration = generic_experiment(
             configuration,
