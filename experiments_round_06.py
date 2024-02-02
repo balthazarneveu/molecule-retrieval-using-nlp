@@ -80,7 +80,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
         configuration[NAME] += " Pretrained on 573"
-    if exp == 610 or exp == 611:
+    elif exp == 610 or exp == 611:
         # 573 LLM
         lr = 1e-3
         batch_size = 128
@@ -109,6 +109,32 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         configuration[NAME] += " Pretrained on 573"
 
+    elif exp == 612:
+        # 573 LLM
+        lr = 1e-3
+        batch_size = 512
+        n = 65
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=BIG_GCN,
+            n=n,
+            b=batch_size, lr=lr, wd=1e-1,
+            lora=False, quantization=None,
+            temperature=False,
+        )
+        REPO_ID = "balthou/9011_BERT_biggerGCN"
+        FILENAME = "model_0202.pt"
+        reload_model = hf_hub_download(repo_id=REPO_ID, filename=FILENAME, cache_dir=OUT_DIR)
+        model.load_state_dict(torch.load(reload_model)["model_state_dict"])
+        for param in model.text_encoder.bert.parameters():
+            param.requires_grad = False
+        graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=512, graph_hidden_channels=512)
+        model.graph_encoder = graph_encoder
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
+        configuration["use_amp"] = True
+        configuration[SCHEDULER] = "ReduceLROnPlateau"
+        configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+        configuration[NAME] += " Pretrained on 573"
     elif exp == 630:
         # 9009 Lea competition of loss
         model, configuration = generic_experiment(
