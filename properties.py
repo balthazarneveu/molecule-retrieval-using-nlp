@@ -24,6 +24,6 @@ OUT_DIR = ROOT_DIR/'__output'
 OUT_DIR.mkdir(exist_ok=True, parents=True)
 PLATEAU, COSINE_WARMUP = "Plateau", "CosineWarmup"
 DISTILBERT, SCIBERT = "distilbert", "scibert"
-BASE_GCN, BIG_GCN, FAT_GCN = "base_gcn", "big_gcn", "fat_gcn"
+BASE_GCN, BIG_GCN, FAT_GCN, ULTRA_FAT_GCN = "base_gcn", "big_gcn", "fat_gcn", "ultra_fat_gcn"
 LOSS = "loss"
 LOSS_CROSSENTROPY, LOSS_TEMPERED_CROSSENTROPY, LOSS_BINARY_CROSSENTROPY = "ce", "Tempered", "bce"

@@ -6,7 +6,7 @@ from properties import (
 from pathlib import Path
 from properties import OUT_DIR
 from experiments_generic import generic_experiment, custom_lr
-from graph_model import FatGraphEncoder
+from graph_model import FatGraphEncoder, UltraFatGraphEncoder
 from functools import partial
 import torch
 from huggingface_hub import hf_hub_download
@@ -109,8 +109,8 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
         configuration[NAME] += " Pretrained on 573"
 
-    elif exp == 612:
-        # 573 LLM
+    elif exp == 612 or exp == 613:
+        # 9011 LLM 86%
         lr = 1e-3
         batch_size = 512
         n = 65
@@ -128,13 +128,20 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         model.load_state_dict(torch.load(reload_model)["model_state_dict"])
         for param in model.text_encoder.bert.parameters():
             param.requires_grad = False
-        graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=512, graph_hidden_channels=512)
+        if exp == 612:
+            graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=512, graph_hidden_channels=512)
+        elif exp == 613:
+            graph_encoder = UltraFatGraphEncoder(num_node_features=300, nout=768, nhid=512, graph_hidden_channels=512)
         model.graph_encoder = graph_encoder
         configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration["use_amp"] = True
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
-        configuration[NAME] += " Pretrained on 573"
+        configuration[NAME] += " Pretrained on 9011"
+        if exp == 612:
+            configuration[NAME] = configuration[NAME].replace("biggerGCN", " FatGCN")
+        if exp == 613:
+            configuration[NAME] = configuration[NAME].replace("biggerGCN", " UltraFatGCN")
     elif exp == 630:
         # 9009 Lea competition of loss
         model, configuration = generic_experiment(
