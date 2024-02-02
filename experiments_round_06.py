@@ -33,7 +33,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
             periods_dampen=5
         )
         configuration[SCHEDULER_CONFIGURATION] = dict(lr_lambda=lr_lambda)
-    elif exp == 601 or exp == 620:
+    elif exp == 601 or exp == 620 or exp == 621:
         # configuration["max_step_per_epoch"] = 5
         lr = 4e-4
         model, configuration = generic_experiment(
@@ -45,6 +45,11 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
             lora=True, quantization=None,
             temperature=True,
         )
+        if exp == 621:
+            REPO_ID = "balthou/0620_LoraBERT-biggerGCN"
+            FILENAME = "model_0058.pt"
+            reload_model = hf_hub_download(repo_id=REPO_ID, filename=FILENAME, cache_dir=OUT_DIR)
+            model.load_state_dict(torch.load(reload_model)["model_state_dict"])
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
         configuration[LOSS] = LOSS_TEMPERED_CROSSENTROPY
