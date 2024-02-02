@@ -1,7 +1,7 @@
 from properties import (
     SCHEDULER, SCHEDULER_CONFIGURATION,
     DISTILBERT, SCIBERT, BIG_GCN, FAT_GCN, PLATEAU,
-    LOSS, NAME, BATCH_SIZE
+    LOSS, NAME, BATCH_SIZE, LOSS_TEMPERED_CROSSENTROPY
 )
 from pathlib import Path
 from properties import OUT_DIR
@@ -47,7 +47,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         )
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
-        configuration[LOSS] = "Tempered"
+        configuration[LOSS] = LOSS_TEMPERED_CROSSENTROPY
     elif exp == 603 or exp == 604:
         # 573
         lr = 4e-4
@@ -119,6 +119,6 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[BATCH_SIZE] = (128, 32, 32)
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
-        configuration[LOSS] = "Tempered"
+        configuration[LOSS] = LOSS_TEMPERED_CROSSENTROPY
     print(configuration)
     return model, configuration

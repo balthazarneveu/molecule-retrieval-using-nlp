@@ -1,7 +1,7 @@
 from properties import (
     NB_EPOCHS, BATCH_SIZE, OPTIMIZER, SCHEDULER, SCHEDULER_CONFIGURATION,
     TRAIN, VALIDATION, DATA_DIR, MAX_STEP_PER_EPOCH, ROOT_DIR,
-    TOKENIZER_NAME
+    TOKENIZER_NAME, LOSS, LOSS_BINARY_CROSSENTROPY, LOSS_CROSSENTROPY, LOSS_TEMPERED_CROSSENTROPY
 )
 from data_dumps import Dump
 from torch_geometric.data import DataLoader
@@ -15,7 +15,7 @@ from pathlib import Path
 from transformers import PreTrainedTokenizer
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts, LambdaLR
-from loss import contrastive_loss, tempered_contrastive_loss
+from loss import contrastive_loss, tempered_contrastive_loss, binary_classifier_contrastive_loss
 from tqdm import tqdm
 import logging
 from typing import Optional, Tuple
@@ -27,10 +27,12 @@ import shutil
 def train(
         model, optimizer, count_iter, epoch, train_loader,
         max_count: Optional[int] = None,
-        print_freq: Optional[int] = 50, device: Optional[str] = 'cuda',
+        print_freq: Optional[int] = 50,
+        device: Optional[str] = 'cuda',
         writer: Optional[SummaryWriter] = None,
         scheduler=None,
-        scaler: torch.cuda.amp.GradScaler = None
+        scaler: torch.cuda.amp.GradScaler = None,
+        loss_type=LOSS_CROSSENTROPY
 ) -> Tuple[torch.nn.Module, list]:
     """
     Trains the model for one epoch and returns the trained model and a list of losses for each batch.
@@ -77,9 +79,13 @@ def train(
             if hasattr(model, "temperature"):
                 current_loss = tempered_contrastive_loss(x_graph, x_text, model.temperature)
                 logging.debug(f"temp: {model.temperature.item():.4f}")
-            else:
+            elif loss_type == LOSS_CROSSENTROPY:
                 current_loss = contrastive_loss(x_graph, x_text)
-
+            elif loss_type == LOSS_BINARY_CROSSENTROPY:
+                current_loss = binary_classifier_contrastive_loss(x_graph, x_text)
+        if torch.isnan(current_loss):
+            print("WARNING NaN in loss")
+            continue
         scaler.scale(current_loss).backward()  # current_loss.backward()
         scaler.step(optimizer)  # optimizer.step()
         scaler.update()
@@ -164,7 +170,8 @@ def training(
         epoch_losses = [0]
         model, epoch_losses = train(model, optimizer, count_iter, epoch, train_loader,
                                     max_count=max_count, print_freq=print_freq, device=device,
-                                    writer=writer_tra, scheduler=scheduler, scaler=scaler)
+                                    writer=writer_tra, scheduler=scheduler, scaler=scaler,
+                                    loss_type=configuration.get(LOSS, LOSS_CROSSENTROPY))
         all_losses.extend(epoch_losses)
         model.eval()
         if "cuda" in device:
