@@ -162,5 +162,32 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
         configuration[LOSS] = LOSS_TEMPERED_CROSSENTROPY
+
+    elif exp == 614:
+        # 573 LLM
+        lr = 1e-3
+        batch_size = 512
+        n = 400
+        model, configuration = generic_experiment(
+            configuration,
+            llm=SCIBERT, graph=FAT_GCN,
+            n=n,
+            b=batch_size, lr=lr, wd=1e-1,
+            lora=True, quantization=None,
+            temperature=False,
+        )
+        REPO_ID = "balthou/molnlp_0573_LoraSciBERT_FatGCN"
+        FILENAME = "model_0145.pt"
+        reload_model = hf_hub_download(repo_id=REPO_ID, filename=FILENAME, cache_dir=OUT_DIR)
+        model.load_state_dict(torch.load(reload_model)["model_state_dict"])
+        for param in model.text_encoder.bert.parameters():
+            param.requires_grad = False
+        graph_encoder = FatGraphEncoder(num_node_features=300, nout=768, nhid=512, graph_hidden_channels=512)
+        model.graph_encoder = graph_encoder
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
+        configuration[SCHEDULER] = "ReduceLROnPlateau"
+        configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.7)
+        configuration[NAME] += " Pretrained on 573"
+        configuration["use_amp"]=True
     print(configuration)
     return model, configuration
