@@ -35,6 +35,27 @@ def get_round_8_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[LOSS] = ",".join([LOSS_TEMPERED_CROSSENTROPY, LOSS_BINARY_CROSSENTROPY])
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
+    elif exp == 801:
+        # Experiment with big batch size, tempered loss + BCE.
+        lr = 3e-4
+        batch_size = 256
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT,
+            graph=BIG_GCN,
+            n=400,
+            b=batch_size,
+            lr=lr,
+            wd=1e-1,
+            lora=True,
+            quantization=None,
+            mixed_precision=True,
+            temperature=True
+        )
+        configuration[LOSS] = ",".join([LOSS_TEMPERED_CROSSENTROPY, LOSS_BINARY_CROSSENTROPY])
+        configuration[SCHEDULER] = "ReduceLROnPlateau"
+        configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.8)
+
 
         # configuration[SCHEDULER] = "LambdaLR"
         # lr_lambda = partial(
