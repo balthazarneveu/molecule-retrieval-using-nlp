@@ -17,17 +17,17 @@ def get_round_8_experience(exp: int, configuration: dict, root_dir: Path = None,
     assert exp >= 800 and exp < 899, f"Experiment {exp} is not in the round 8"
     if exp == 800:
         # Experiment with big batch size, tempered loss + BCE.
-        lr = 1e-3
-        batch_size = 2
+        lr = 3e-4
+        batch_size = 256
         model, configuration = generic_experiment(
             configuration,
-            llm=SCIBERT,
+            llm=DISTILBERT,
             graph=BIG_GCN,
             n=400,
             b=batch_size,
             lr=lr,
             wd=1e-1,
-            lora=True,
+            lora=False,
             quantization=None,
             mixed_precision=True,
             temperature=True
