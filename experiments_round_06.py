@@ -167,7 +167,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         # 573 LLM
         lr = 1e-3
         batch_size = 512
-        n = 200
+        n = 400
         model, configuration = generic_experiment(
             configuration,
             llm=SCIBERT, graph=FAT_GCN,
@@ -186,7 +186,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         model.graph_encoder = graph_encoder
         configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[SCHEDULER] = "ReduceLROnPlateau"
-        configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+        configuration[SCHEDULER_CONFIGURATION] = dict(patience=8, factor=0.7)
         configuration[NAME] += " Pretrained on 573"
         configuration["use_amp"]=True
     print(configuration)
