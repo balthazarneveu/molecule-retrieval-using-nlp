@@ -19,7 +19,23 @@
     abstract = "We propose a new task, Text2Mol, to retrieve molecules using natural language descriptions as queries. Natural language and molecules encode information in very different ways, which leads to the exciting but challenging problem of integrating these two very different modalities. Although some work has been done on text-based retrieval and structure-based retrieval, this new task requires integrating molecules and natural language more directly. Moreover, this can be viewed as an especially challenging cross-lingual retrieval problem by considering the molecules as a language with a very unique grammar. We construct a paired dataset of molecules and their corresponding text descriptions, which we use to learn an aligned common semantic embedding space for retrieval. We extend this to create a cross-modal attention-based model for explainability and reranking by interpreting the attentions as association rules. We also employ an ensemble approach to integrate our different architectures, which significantly improves results from 0.372 to 0.499 MRR. This new multimodal approach opens a new perspective on solving problems in chemistry literature understanding and molecular machine learning.",
 }
 
+@misc{bert,
+      title={BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding}, 
+      author={Jacob Devlin and Ming-Wei Chang and Kenton Lee and Kristina Toutanova},
+      year={2019},
+      eprint={1810.04805},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
 
+@misc{transformer,
+      title={Attention Is All You Need}, 
+      author={Ashish Vaswani and Noam Shazeer and Niki Parmar and Jakob Uszkoreit and Llion Jones and Aidan N. Gomez and Lukasz Kaiser and Illia Polosukhin},
+      year={2023},
+      eprint={1706.03762},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
 @misc{scibert,
       title={SciBERT: A Pretrained Language Model for Scientific Text}, 
       author={Iz Beltagy and Kyle Lo and Arman Cohan},
@@ -29,7 +45,7 @@
       primaryClass={cs.CL}
 }
 
-@article{molICLR,
+@article{molCLR,
    title={Molecular contrastive learning of representations via graph neural networks},
    volume={4},
    ISSN={2522-5839},
@@ -42,6 +58,34 @@
    year={2022},
    month=mar, pages={279-287} }
 
+@misc{simSIAM,
+      title={Exploring Simple Siamese Representation Learning}, 
+      author={Xinlei Chen and Kaiming He},
+      year={2020},
+      eprint={2011.10566},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
+
+@misc{DINO,
+      title={Emerging Properties in Self-Supervised Vision Transformers}, 
+      author={Mathilde Caron and Hugo Touvron and Ishan Misra and Hervé Jégou and Julien Mairal and Piotr Bojanowski and Armand Joulin},
+      year={2021},
+      eprint={2104.14294},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
+@misc{SIMCLR,
+      title={A Simple Framework for Contrastive Learning of Visual Representations}, 
+      author={Ting Chen and Simon Kornblith and Mohammad Norouzi and Geoffrey Hinton},
+      year={2020},
+      eprint={2002.05709},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
 @misc{CLIP,
       title={Learning Transferable Visual Models From Natural Language Supervision}, 
       author={Alec Radford and Jong Wook Kim and Chris Hallacy and Aditya Ramesh and Gabriel Goh and Sandhini Agarwal and Girish Sastry and Amanda Askell and Pamela Mishkin and Jack Clark and Gretchen Krueger and Ilya Sutskever},
@@ -49,4 +93,23 @@
       eprint={2103.00020},
       archivePrefix={arXiv},
       primaryClass={cs.CV}
+}
+
+
+@misc{distilbert,
+      title={DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter}, 
+      author={Victor Sanh and Lysandre Debut and Julien Chaumond and Thomas Wolf},
+      year={2020},
+      eprint={1910.01108},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@misc{kipfwellinggcn,
+      title={Semi-Supervised Classification with Graph Convolutional Networks}, 
+      author={Thomas N. Kipf and Max Welling},
+      year={2017},
+      eprint={1609.02907},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
 }
