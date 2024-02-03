@@ -55,6 +55,7 @@ def train(
     Returns:
         Tuple[torch.nn.Module, list]: The trained model and a list of losses for each batch.
     """
+    loss_type_table = loss_type.split(",")
     logging.info('-----EPOCH{}-----'.format(epoch+1))
     model.train()
     losses = []
@@ -76,13 +77,21 @@ def train(
                                     attention_mask.to(device))
             if x_text.dtype == torch.float16:
                 x_graph = x_graph.half()
-            if hasattr(model, "temperature"):
-                current_loss = tempered_contrastive_loss(x_graph, x_text, model.temperature)
+            current_loss = 0
+            if LOSS_TEMPERED_CROSSENTROPY in loss_type_table:
+                assert hasattr(model, "temperature"), "Model has no temperature attribute."
+                current_loss += tempered_contrastive_loss(x_graph, x_text, model.temperature)
+                if count_iter == 0 and batch_idx == 0:
+                    print("tempered contrastive loss")
                 logging.debug(f"temp: {model.temperature.item():.4f}")
-            elif loss_type == LOSS_CROSSENTROPY:
-                current_loss = contrastive_loss(x_graph, x_text)
-            elif loss_type == LOSS_BINARY_CROSSENTROPY:
-                current_loss = binary_classifier_contrastive_loss(x_graph, x_text)
+            if LOSS_CROSSENTROPY in loss_type_table:
+                if count_iter == 0 and batch_idx == 0:
+                    print("cross entropy")
+                current_loss += contrastive_loss(x_graph, x_text)
+            if LOSS_BINARY_CROSSENTROPY in loss_type_table:
+                if count_iter == 0 and batch_idx == 0:
+                    print("binary contrastive loss")
+                current_loss += binary_classifier_contrastive_loss(x_graph, x_text)
         if torch.isnan(current_loss):
             print("WARNING NaN in loss")
             continue

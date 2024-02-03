@@ -31,14 +31,16 @@ def generic_experiment(
     graph: Optional[Union[str, torch.nn.Module]] = BASE_GCN,
     scheduler: Optional[str] = None,
     scheduler_configuration: Optional[dict] = None,
-    temperature: Optional[float] = None
+    temperature: Optional[float] = None,
+    mixed_precision: Optional[bool] = False
 ) -> Tuple[torch.nn.Module, dict]:
     # ------------------------------------------------------------------------------------ HYPERPARAMETERS
     configuration[NB_EPOCHS] = n
     configuration[OPTIMIZER][LEARNING_RATE] = lr
     configuration[OPTIMIZER][WEIGHT_DECAY] = wd
     configuration[BATCH_SIZE] = (b, b, b)
-
+    if mixed_precision:
+        configuration["use_amp"] = True
     # ------------------------------------------------------------------------------------ SCHEDULER
     if scheduler is not None and isinstance(scheduler, str):
         assert scheduler in SCHEDULER_SHORT_NAMES, f"{scheduler} must be in {SCHEDULER_SHORT_NAMES}"
