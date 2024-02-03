@@ -6,7 +6,7 @@ from properties import (
 from pathlib import Path
 from properties import OUT_DIR
 from experiments_generic import generic_experiment, custom_lr
-from graph_model import FatGraphEncoder, UltraFatGraphEncoder
+from graph_model import BigGraphEncoder, FatGraphEncoder, UltraFatGraphEncoder
 from functools import partial
 import torch
 from huggingface_hub import hf_hub_download
@@ -209,7 +209,7 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         model.load_state_dict(torch.load(reload_model)["model_state_dict"])
         for param in model.text_encoder.bert.parameters():
             param.requires_grad = False
-        graph_encoder = BIG_GCN(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
+        graph_encoder = BigGraphEncoder(num_node_features=300, nout=768, nhid=256, graph_hidden_channels=512)
         model.graph_encoder = graph_encoder
         configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[SCHEDULER] = "ReduceLROnPlateau"
