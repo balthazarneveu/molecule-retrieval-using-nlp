@@ -70,7 +70,6 @@ def train(
         attention_mask = batch.attention_mask
         batch.pop('attention_mask')
         graph_batch = batch
-        # if scaler is None:
         with torch.autocast(device_type=device, dtype=torch.float16, enabled=scaler.is_enabled()):
             x_graph, x_text = model(graph_batch.to(device),
                                     input_ids.to(device),
