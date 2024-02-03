@@ -37,8 +37,9 @@ python evaluation.py -e 620
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{figures/training_framework.png}
-    \caption{Remote training framework allows accessing free GPU resources on Kaggle Kernels. Local code is synchronized through our \textbf{private Github repository} (until the 4th of February) so the remote notebook can be run with the same code. The \textbf{Kaggle dataset} feature is used to store the raw dataset and the preprocessed data (for each tokenizer, we have stored the preprocessed dataset which saves nearly 10 minutes of computation time at the begining of each experiment). The \textbf{Weights and biases} platform is used to track the experiments results and monitor the training. Once finished, trained models can be retrieved by pulling the results.
-    Note that the small piece of code to help access \href{https://github.com/balthazarneveu/mva\_pepites}{Kaggle notebooks freely from the terminal} was made available publicly (totally independantly from this challenge) to be later used on other projects.}
+    \caption{Remote training framework allows accessing free GPU resources on Kaggle Kernels. Local code is synchronized through our \textbf{private Github repository} (until the 4th of February) so the remote notebook can be run with the same code. The \textbf{Kaggle dataset} feature is used to store the raw dataset and the preprocessed data (for each tokenizer, we have stored the preprocessed dataset which saves nearly 10 minutes of computation time at the begining of each experiment). To fine tune our own models, we use \hred{https://huggingface.co/balthou}{Hugging Face} as an exchange platform so we could easily start from a checkpoint from any remove computer. The \textbf{Weights and biases} platform is used to track the experiments results and monitor the training. Once finished, trained models can be retrieved by pulling the results.
+    Note that the small piece of code to help access Kaggle notebooks freely from the terminal was made available \href{https://github.com/balthazarneveu/mva\_pepites}{publicly} (totally independantly from this challenge) to be later used on other projects.
+    }
     \label{fig:framework}
 \end{figure}
 
