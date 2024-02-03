@@ -48,22 +48,22 @@
   %% KEYWORDS
   \keywords{contrastive learning, graph neural networks, large language models}
 
-
   %% Teaser figure
+% \begin{figure*}[ht]
   \begin{teaserfigure}
-    \includegraphics[width=1.\textwidth]{figures/mol_text_overview.PNG}
+    \includegraphics[width=0.9\textwidth]{figures/mol_text_overview.PNG}
     \centering
-    \caption{On the left side, text descriptions are transformed into sequences of tokens of various lengths. Tokenized sequences are then embedded into a vector space using a language model encoder. Each description $T_{i}$ is transformed into a vector $t_{i}$ (\color{lime} text descriptions embeddings\color{black}). In the middle, molecules $M_{i}$ will be transformed into vector descriptors $m_{i}$ (\color{purple}{molecule embeddings}\color{black}). Each atom is first transformed into a vector using its neighboring atoms. The graph structure is kept as an undirected graphs to model the bounds between atoms. A graph neural network is then used to embed these graphs into a vector space. The molecule and text descriptions embeddings are then compared. At inference time, a text sentence $T$ will be embedded into a vector $t$ which is comparable with relevant matching molecules. The closest molecule embeddings can be proposed to the chemist. Contrastive learning is used to train such a model: supervision comes from the knowlege of the pairing between the molecule and its text description. This is shown on the right side where we compute the similarity between the molecule embedding $m_{i}$ and text embeddings $t_{i}$. The idea behing contrastive learning relies on maximizing similarity between molecules and text embeddings for the correct pair and minimized for the wrong pairs.
+    \caption{Our system matches a text description with the most relevant molecules. On the left side, text descriptions $T_{i}$ are tokenized and transformed into a numerical representations (embeddings) $t_{i}$ using a large language model. In the center, molecules $M_{i}$ represented using graph structures are processed by a graph neural network to create embeddings $m_{i}$. On the right side, pairwise similarity matrix between text and molecule allows finding the best matches (ranking) and is also the central mathematical object used to train the system (contrastive learning).
     }
     \label{fig:original_pipeline}
-  \end{teaserfigure}
+\end{teaserfigure}
+% \end{figure*}
+
   %% TITLE
   \maketitle
 
 
   %% ABSTRACT
-
-This study aims at building powerful and consistent vector representions of text descriptions and molecules. The most direct use is a retrieval system for chemical compounds based on text descriptions (good representions can generally also be used for other downstream tasks). Recent advances in contrastive learning allow creating powerful representions for various modalities which can be embedded in a shared vector space. The embedding vectors of both the text description and the molecule shall be similar. We use a pretrained Large Language Model and a Graph Neural Network to create the embeddings. To get an accurate system, complexity mostly comes as an engineering challenge which we had to solve. 
 
   %% CONTENT
   \input{content/1_introduction.tex}

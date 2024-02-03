@@ -1,10 +1,10 @@
+%% tbf pas sûre de l'utilité de faire un abstract, serait plus joli en fin d'intro pour contextualiser 
+This study aims at building meaningful vector representations of text descriptions and molecules. The challenge is to consistently embed these two modalities into the same vector space. The most direct application is a retrieval system for chemical compounds based on text descriptions. Good molecule representations are more general as they may be re-used in other downstream tasks (interesting chemical properties may emerge from the molecule embeddings we get). We used a pretrained Large Language Model (LLM) and a Graph Convolutional Network (GCN) to map the two modalities into a shared embedding space and trained our models using contrastive learning. Our best model achieves a LRAP score of \textbf{0.905} on the  ~\href{https://www.kaggle.com/competitions/altegrad-2023-data-challenge/leaderboard}{provided challenge test set}.
+
 \section{Introduction}
 \label{sec:intro}
+Recent advances in contrastive learning have allowed creating powerful representations for various modalities which can be embedded in the same shared vector space. CLIP \cite{CLIP} learns image representations which match with text description. \textit{Can the same idea be extended to molecules and text?}
+
 Text-2-Mol \cite{text2mol} introduced the groundings of the problem of pairing a text description with the corresponding molecule.
-Their contribution also cam with a dataset made of 33k which is always appreciated among the research community.
-Here we're using this dataset and the problem is restricted to using this data solely.
-We're leveraging the language understanding contained in pretrained Large Language Models (LLM) to create embeddings for text descriptions.
-We at least start with models that have good understanding of the English language. The whole point is to transfer this knowledge to the chemical domain to be able to understand molecule structure from a description.
-Our code is available on ~\href{https://github.com/balthazarneveu/molecule-retrieval-u sing-nlp}{GitHub}.
-
-
+Text-2-Mol also came with a dataset of 33k molecule paired with a textual description, made publicly available (which is always appreciated among the research community).
+We're using this dataset and the problem is restricted to using this data solely. Solving this problem requires having a model with a good understanding of natural language. We're leveraging the language capabilities inherent to pretrained Large Language Models (LLM) to create embeddings for text descriptions. We at least start with models that have good understanding of the English language. The difficulty stands in how we guide the language model to detect text features (chemical domain understanding) which will match with the molecule patterns. To achieve this, a GNN (graph neural network) is trained along the LLM to extract information from the molecule graph structure which shall be as close as possible to the text representation.

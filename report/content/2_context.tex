@@ -3,24 +3,44 @@
 
 
 \subsection{Dataset}
-\label{sec:sota}
-
+\label{sec:dataset}
+The provided dataset is made of molecules. 
 \color{red}TODO - Describe dataset in depth and challenge \color{black}
 
 
 \subsection{State of the art}
 \label{sec:sota}
+In the following section, we'll briefly describe relevant work related to our topic.
 
-\color{red}TODO - State of the art - Text2mol, CLIP, MolICLR augmentations=Contrastive learning for molecules only\color{black}
+\subsubsection{Machine learning on molecules}
+\label{sec:sota_molec}
+Text-2-Mol\cite{text2mol}
+Mol-CLR \cite{molCLR} tackles the problem of learning powerful representations solely from molecules only. Recent papers (such as SIMCLR\cite{SIMCLR}, Sim-SIAM \cite{simSIAM} and DINO\cite{DINO}) showed that great properties emerged from contrastive learning on images when applied to downstream tasks. So what about molecules? To be able to perform contrastive learning on a single modality, one needs to be able to augment the same data sample in several ways so that a human could still tell they're alike (in images, performing various crops or color transforms will still allow to recognize that the two augmented versions depict the same object for instance). MolCLR introduced interesting ways for molecule augmentations:
 
+\textit{atom masking}: vector representation set to a fixed token so the atom is considered masked / undefined)
 
+\textit{bound deletion}: removed a certain amount of edges across the graphs
 
-\subsubsection{BERT: our base LLM}
+\textit{subgraph removal}: mask an atom and it k-hop neighbors until it saturates to a certain amount of masked atoms (and finally remove the bounds inside the selected sub graph)
+
+This technique could be thought as a pre-training task for the GCN although it seems to require a huge amount of data as the authors using approximately 10 millions of unique unlabelled molecules.
+
+% \color{red}TODO - State of the art - Text2mol, CLIP, MolICLR augmentations=Contrastive learning for molecules only\color{black}
+
+\subsubsection{Multi-modal contrastive learning}
+\label{sec:clip}
+The \cite{CLIP} paper introduced by OpenAI builds image representation embedded in the same vector space as textual representations. We recall a few important points noted from this paper as we're tackling a multi modal contrastive learning task. 
+\begin{itemize}
+    \item Contrastive learning requires very large batch sizes (32000 image/text pairs per batch according to the authors). 
+\end{itemize}
+\subsubsection{BERT: a versatile language model}
 \label{sec:bert}
-\color{red}TODO - Describe BERT and Distil BERT and SciBERT\color{black}
-
-
+The BERT paper \cite{bert} tackles the masked language modeling problem by training the encoder part of the Transformer \cite{transformer} model. BERT is a general purpose language representation model which become useful after fine tuning on downstream tasks (such as text classification or sentiment analyzis but not chatbots).  On the contrary to causal language modeling, BERT is not trained using next word prediction (unlike the GPT family) but instead uses the whole sentence to predict a masked word in the middle of it. BERT is able to build great language understanding capabilities which is what we're looking for here: a downstream task in the chemistry domain.
+Researchers at Hugging Face \cite{distilbert} worked on a distilled version of BERT which results in smaller model with nearly as good language modeling capabilities (\textit{97\% as good, 60\% of the original size, 60\% faster}). Student model (DistilBERT) is trained to mimic the teacher (BERT)'s probability distribution for each output word. This is different from the original masked language training which supervises the network by telling if the predicted word matches with the ground truth word.
+Sci-BERT\cite{scibert} is a BERT architecture which has been trained on a large scientific corpus made of more than one million scientific papers for a total of more than 3 billions of tokens (similar to BERT) and where the corpus has been tokenized. The tokenizer named SciVocab is provided along with the models on \href{https://huggingface.co/allenai/scibert_scivocab_uncased}{Hugging Face}.
 
 \subsubsection{GCN: graph convolution networks}
 \label{sec:GCN}
-\color{red}TODO - Quickly recall Kipf and Welling + using Pytorch geometry (sparse graphs?)\color{black}
+
+The pioneering and popular work of Kipf and Welling \cite{kipfwellinggcn} has defined a simple yet powerful local graph convolution operation which becomes extremely useful when stacked in a neural network architecture. To each input node of the graph, we attach a vector. Each node vector is processed using linear projection layers followed by non linearity function (such as ReLu), just like a MLP would process each nod vector separately. The graph structure is then exploited by averaging local neighbor node content (\textit{message passing}). Stacking several such operations allows extracting relevant graph structures. The processed graph output can either be used to classify each individual node (for nodes classification) or treating the graph as a whole by using an extra pooling layer (graph classification). For the molecules, we don't need to use the representation of each atom separately so a pooling mechanism will be used. We heavily rely on the \href{https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.conv.GCNConv.html}{Pytorch geometry GCNConv operator} which is the combination of a linear layer (mix channels) and the aggregation layer (average neighboring nodes). The symmetrically normalized adjacency matrix is used and allows numerical stability (we have not faced any issue when stacking these layers has not been problematic). One important point though is that the mean operator used to aggregate neighboring content may break the "counting" capability. For example, \textit{assume we have (H,H, O,O) in a neighborhood of an atom, the result of the convolution will be the same as the one with (H, O) neighbors}). Fortunately, we have to keep in mind that the local structure has been included in the vector content of each node so the previous counter example won't be a problem.
+% There may exist more relevant architectures dedicated to pure structure extraction -> GIN , using the sum?. Interesting read here https://wandb.ai/syllogismos/machine-learning-with-graphs/reports/18-Limitations-of-Graph-Neural-Networks--VmlldzozODUxMzQ

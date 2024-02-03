@@ -13,7 +13,7 @@ We have a few ideas that we didn't have time to explore or fully try out but tha
 \textbf{Freezing the LLM, training a large GCN from scratch} \textit{Not fully explored}
 We have experimented with the following idea. Train jointly a decent model with a correct batch size. We assume that the LLM is able to create text features which are relevant to our molecule corpus so its weights can now be frozen which reduces a lot the GPU memory used during training. From this point, you can train a larger GCN from scratch (or fine tune your pre-existing one with bigger batch sizes, see table ~\ref{table:ft_gcn_model_memory_occupancy}). Unfortunately, this idea did not lead to satisfactory results.
 
-\begin{table*}[ht]
+\begin{table*}[H]
     \centering
     \begin{tabular}{ccccc}
     \hline
@@ -28,12 +28,15 @@ We have experimented with the following idea. Train jointly a decent model with 
     \label{table:ft_gcn_model_memory_occupancy}
 \end{table*}
 
-\subsubsection*{Pretraining LLLM on the text corpus}
-We could have fined tuned the LLM on the text corpus in a masked language modeling task. This would have allowed to have a better understanding of the text corpus and potentially better text embeddings. This could either have been incorporated as a pre-training step or as an auxiliary task to the contrastive learning task(additional loss for masked language learning).
+\subsubsection*{Single-modality pretraining}
+We could have fined tuned the LLM on the text corpus of molecules descriptions only in a masked language modeling task. This could have allowed to have a better understanding of the text corpus and potentially better text embeddings. This could either have been incorporated as a pre-training step or as an auxiliary task to the contrastive learning task(additional loss for masked language learning).
+Same exact idea could go to pre-train the GCN. Once could think of training solely on molecules the same way mol-CLR \cite{molCLR} did, although the authors used 10 millions of unlabeled molecules.
 
 \subsubsection*{Data augmentation}
-Graph molecules augmentations have been proposed in mol-ICLR \cite{molICLR}. CLIP \cite{CLIP} also used a vast amount of augmentations on images. We could have trimmed the sequence lengths, inverted a few words. Unsure if this would have helped but a future idea to be explored.
-\color{red}TODO - Describe data augmentation MolICLR\color{black}
+Graph molecules augmentations (see \ref{sec:sota_molec}) have been proposed in mol-ICLR \cite{molCLR} . CLIP \cite{CLIP} also used a vast amount of augmentations on images. We could have trimmed the sequence lengths, inverted a few words. We're unsure if this would have helped but it could be a future idea to be explore.
 
 Since a lot of molecules are not paired with a text description, 
 \color{red}TODO - Check if we have the 100.000 graphs available!!!!!\color{black}
+
+
+\subsubsection*{Data augmentation}
