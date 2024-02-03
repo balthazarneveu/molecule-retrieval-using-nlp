@@ -142,6 +142,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE] = (128, 32, 32)
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
 
     elif exp == 9071:  # celle qui marche le mieux de loin
         model, configuration = generic_experiment(
@@ -153,6 +154,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE] = (128, 32, 32)
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
 
     elif exp == 9072:  # celle qui marche le mieux de loin
         model, configuration = generic_experiment(
@@ -164,6 +166,8 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE] = (128, 32, 32)
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
+
     elif exp == 9073:  # tentative avec bs 64
         model, configuration = generic_experiment(
             configuration,
@@ -174,6 +178,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             lora=False, quantization=None
         )
         configuration[BATCH_SIZE] = (64, 32, 32)
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
 
     elif exp == 9074:  # tentative avec bs 64
         model, configuration = generic_experiment(
@@ -184,6 +189,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.9),
             lora=False, quantization=None
         )
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[BATCH_SIZE] = (64, 32, 32)
     elif exp == 9075:  # tentative avec bs 64
         model, configuration = generic_experiment(
@@ -194,6 +200,7 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.9),
             lora=False, quantization=None
         )
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[BATCH_SIZE] = (64, 32, 32)
     elif exp == 9076:  # 9070 smaller lr
         model, configuration = generic_experiment(
@@ -204,8 +211,20 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=10, factor=0.9),
             lora=False, quantization=None
         )
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[BATCH_SIZE] = (128, 32, 32)
     elif exp == 9077:  # tentative avec bs 64
+        model, configuration = generic_experiment(
+            configuration,
+            llm=DISTILBERT, graph=FAT_GCN,
+            n=300,
+            b=92, lr=1e-4, wd=1e-1,
+            scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.7),
+            lora=False, quantization=None
+        )
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
+    
+    elif exp == 9078:  # tentative avec bs 64
         model, configuration = generic_experiment(
             configuration,
             llm=DISTILBERT, graph=FAT_GCN,
@@ -214,6 +233,8 @@ def get_round_90_experience(exp: int, configuration: dict, root_dir: Path = None
             scheduler=PLATEAU, scheduler_configuration=dict(patience=8, factor=0.7),
             lora=False, quantization=None
         )
+        configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
+
     # first experiment to be trained with the new loss
     elif exp == 9090:
         model, configuration = generic_experiment(
