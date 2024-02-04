@@ -18,7 +18,6 @@ if __name__ == "__main__":
         OUT_DIR/"9009_BERT - FatGCN"/"submission_original.csv",
         OUT_DIR/"9010_BERT - FatGCN"/"submission.csv",
         OUT_DIR/"9011_BERT-biggerGCN"/"submission.csv",
-        OUT_DIR/"9011_BERT-biggerGCN"/"submission.csv",
         OUT_DIR/"0611_LoraSciBERT-GCN - FatGCN Pretrained on 573/submission.csv",
         OUT_DIR/"9075_BERT - FatGCN/submission.csv",
         OUT_DIR/"9077_BERT - FatGCN/submission.csv",
