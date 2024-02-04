@@ -13,7 +13,7 @@ We have a few ideas that we didn't have time to explore or fully try out but tha
 \textbf{Freezing the LLM, training a large GCN from scratch} \textit{Not fully explored}
 We have experimented with the following idea. Train jointly a decent model with a correct batch size. We assume that the LLM is able to create text features which are relevant to our molecule corpus so its weights can now be frozen which reduces a lot the GPU memory used during training. From this point, you can train a larger GCN from scratch (or fine tune your pre-existing one with bigger batch sizes, see table ~\ref{table:ft_gcn_model_memory_occupancy}). Unfortunately, this idea did not lead to satisfactory results.
 
-\begin{table*}[H]
+\begin{table*}[h]
     \centering
     \begin{tabular}{ccccc}
     \hline

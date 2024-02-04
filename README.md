@@ -15,8 +15,10 @@ MVA23 ALTEGRAD data challenge on Molecule retrieval using natural language analy
 
 | ![](/report/figures/logo.png) |
 |:-----:|
-| :medal_military: [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge) |
+| :medal_military: [Kaggle](https://www.kaggle.com/competitions/altegrad-2023-data-challenge) - LRAP 0.905 |
 | :trophy: [Weights and biases](https://wandb.ai/molecule-nlp-altegrad-23) |
+| :scroll: [Report](/report/report.pdf) |
+
 
 ------
 # :gear: Setup
@@ -87,10 +89,6 @@ This will create a dedicated folder for training a specific experiment with a de
 Please note that the first time, you'll need to manually edit the notebook under kaggle web page to allow secrets.
 
 
-#### :scroll: Notebook
-- Setup a drive folder named `molecules-nlp` where you can store results checkpoints
-- Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training, ready for Colab & Kaggle.
-
 
 # :toolbox: Experimenting
 ## :jigsaw: Training 
@@ -101,8 +99,12 @@ python train.py -e X
 ```
 
 
+## :warning: Ensembling
+To get the final results, we perform [ensembling](ensembling.py) across several models that we trained. 
+
 
 ## :triangular_ruler: Metrics, evaluation
+
 #### Check metrics
 
 
@@ -134,6 +136,8 @@ kaggle competitions submit -c altegrad-2023-data-challenge -f __output/X/submiss
 
 
 ## Related papers review
+[Externals](external/papers)
+
 #### Text2Mol: 
 - Text encoder = SciBERT
 - Linear projection (adapter) + **layer normalization** (why?)
@@ -145,6 +149,7 @@ kaggle competitions submit -c altegrad-2023-data-challenge -f __output/X/submiss
 
 
 ### Saving some time
+Freeze the LLM, train GCN only.
 :fire: LORA SciBERT + :fire: FatGCN - `batch_size=8`
 ```
 Device 1 [NVIDIA T500]                         PCIe GEN 3@ 4x RX: 20.51 MiB/s TX: 7.812 MiB/s
@@ -173,3 +178,8 @@ Device 1 [NVIDIA T500]                         PCIe GEN 3@ 4x RX: 24.41 MiB/s TX
  GPU 1725MHz MEM 5000MHz TEMP  79°C FAN N/A% POW N/A W
  GPU[|||||||||||||||||||||||||||||||||||||100%] MEM[||||||||||||||||||||||||||2.974Gi/4.000Gi]
 ```
+
+### Deprecated
+#### :scroll: Notebook
+- Setup a drive folder named `molecules-nlp` where you can store results checkpoints
+- Use [training_notebook.ipynb](/training_notebook.ipynb) to launch the right training, ready for Colab & Kaggle.
