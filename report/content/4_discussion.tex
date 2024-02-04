@@ -1,42 +1,30 @@
 \section{Discussion}
 \label{sec:discussion}
+\subsection{Limitations}
+\label{sec:limitations}
+It was very difficult to find the right trends regarding which hyper parameter, architecture or loss tweak would have an impact on the final results. We mostly tried to follow a rational path toward improvements but it almost feels like a random search in that space would have been nearly as efficient. This is a difficult problem. We first considered designing a toy example for text/graph contrastive learning by synthesizing graphs from colored primitive geometric shapes associated with text descriptions (\textit{(for instance: blue triangles placed regularly at the ends of a red star with seven branche)}). But it was too unsure that getting intuition from a toy example would have scaled to the molecule problem.
 
-\subsection*{Improvement ideas}
+\subsection{Improvement ideas}
 \label{sec:unexplored_ideas}
-We have a few ideas that we didn't have time to explore or fully try out but that we think could be interesting to try out.
+While working on this project we had several ideas which we did not have time to explore but that we think could lead to interesting results.
 
-\subsubsection*{Increasing batch size}
+\subsubsection{Reducing memory footprint}
 \label{sec:increase_batch_size}
+We have deployed mixed precision training and we did a few unsuccessful attempts with QLORA to reduce the language model RAM occupancy but we still believe that reducing the memory footprint could benefit to training performances (either to increase batch size as suggested by \cite{CLIP}, have larger models or even run the training on smaller GPU resources).
 
-\textbf{Alternating gradient descent between models}\textit{(Idea, Not explored)}. As the LLM and the GNN model are trained jointly, all parameters and optimizer parameters need to be kept in GPU memory. We could try to alternate between training only the LLM while freezing the graph model for a few steps (we would not expect the LLM to change much anyway), then move back the parameters to CPU and alternate with training the GNN model. This would potentially allow to increase the batch size further (you may have to start from a pretrained baseline).
-
-\textbf{Freezing the LLM, training a large GCN from scratch} \textit{Not fully explored}
-We have experimented with the following idea. Train jointly a decent model with a correct batch size. We assume that the LLM is able to create text features which are relevant to our molecule corpus so its weights can now be frozen which reduces a lot the GPU memory used during training. From this point, you can train a larger GCN from scratch (or fine tune your pre-existing one with bigger batch sizes, see table ~\ref{table:ft_gcn_model_memory_occupancy}). Unfortunately, this idea did not lead to satisfactory results.
-
-\begin{table*}[h]
-    \centering
-    \begin{tabular}{ccccc}
-    \hline
-    \textbf{LLM} & \textbf{Batch Size} \textbf{GPU Utilization}& \textbf{GPU Memory Occupancy} \\ \hline
-    Trainable & 8 & 90\% & 2.95 GB \\
-    Frozen & 8 & 91\% & 0.913 GB \\
-    Frozen & 32 & 100\% & 1.29 GB \\
-    Frozen & 128 & 100\% & 2.97 GB \\
-    \hline
-    \end{tabular}
-    \caption{Comparison of memory occupancy for different model configurations on NVIDIA T500 with 4GB of GPU Memory. GCN Model is the FatGCN. LLM is a SciBERT model that we trained from scratch with LORA. This allows putting much larger batch sizes in the GCN model (from batches of size 8 when training LLM and GCN jointly to 128 - please note that the trainable LLM memory in the first row is already reduced a lot by using LoRA compared to traing all parameters at once).}
-    \label{table:ft_gcn_model_memory_occupancy}
-\end{table*}
-
-\subsubsection*{Single-modality pretraining}
-We could have fined tuned the LLM on the text corpus of molecules descriptions only in a masked language modeling task. This could have allowed to have a better understanding of the text corpus and potentially better text embeddings. This could either have been incorporated as a pre-training step or as an auxiliary task to the contrastive learning task(additional loss for masked language learning).
-Same exact idea could go to pre-train the GCN. Once could think of training solely on molecules the same way mol-CLR \cite{molCLR} did, although the authors used 10 millions of unlabeled molecules.
-
-\subsubsection*{Data augmentation}
-Graph molecules augmentations (see \ref{sec:sota_molec}) have been proposed in mol-ICLR \cite{molCLR} . CLIP \cite{CLIP} also used a vast amount of augmentations on images. We could have trimmed the sequence lengths, inverted a few words. We're unsure if this would have helped but it could be a future idea to be explore.
-
-Since a lot of molecules are not paired with a text description, 
-\color{red}TODO - Check if we have the 100.000 graphs available!!!!!\color{black}
+One unexplored idea is alternating gradient descent between models (graphs and LLM). As the LLM and the GNN model are trained jointly, all parameters and optimizer parameters need to be kept in GPU memory. We could try to alternate between training only the LLM while freezing the graph model for a few steps (we would not expect the LLM to change much anyway), then move back the parameters to CPU and alternate with training the GNN model. This would potentially allow to increase batch size further (you may have to start from a pretrained baseline to avoid a difficult initialization).
 
 
-\subsubsection*{Data augmentation}
+\subsubsection{Single-modality pretraining}\hfill\\
+\textit{(Idea, Not explored)}: We could have fined tuned the LLM on the text corpus of molecules descriptions only in a masked language modeling task. This could have allowed to have a better understanding of the text corpus and potentially better text embeddings. This could either have been incorporated as a pre-training step or as an auxiliary task to the contrastive learning task (additional loss for masked language learning).
+In the same gist, we could also pre-train the GCN. One could think of training solely on molecules the same way mol-CLR \cite{molCLR} did, although for this task the authors used 10 millions of unlabeled molecules.
+
+\subsubsection{Data augmentation}
+Graph molecules augmentations have been proposed in mol-ICLR \cite{molCLR}. Regarding language processing, we could have trimmed the sequence lengths and inverted a few words. We're unsure if this would have helped or not but it could be a future idea to be explore (CLIP \cite{CLIP} insists on its benefits for contrastive learning).
+
+
+\subsubsection{Ensembling}
+Instead of averaging cosine similarity results from several models, we could concatenate all embeddings from all models and perform cosine similarity on these. Another idea would be to process all these different embeddings with an additional "decision" network which could be trained to merge various models predictions.
+
+\subsubsection{Graph convolutions}
+Using the basic graph convolution operator \cite{kipfwellinggcn} may not be powerful enough to distinguish complex molecule structures as the aggregation performs a mean of all its neighbors and may loose the ability of counting. GIN \cite{gin_isomorphism} proposes to replace the mean by a sum to have more discriminating power regarding graph patterns. \textit{For example, a carbon atom with 2 hydrogen and 2 oxygen neighbors will get the same convolution output if it had only a single hydrogen and a single oxygen neighbor}. A deeper study of the molecules dataset would be useful to see if there are truly graphs which show this ambiguity and if the Mol-2-Vec \cite{mol2vec} prepossessing did not remove most of these ambiguities.

@@ -1,68 +1,164 @@
-\clearpage
-\section{Appendix: Training framework}
-\label{sec:training_fwk}
-This section describes the work which was done at software level which is definitely not a part that can be neglected when working in group on such a complex machine learning project (a lot of heavy computation power required, long training times for limited chances for improvements).  We describe the constraints we had to face and the solutions we found to overcome them. We trained nearly a hundred experiments which requires good organization and a way to track and monitor everything.
-We came out with a convenient solution which allows respecting all the project constraints and allowed us to focus on the machine learning part of the project.
-
-\subsection*{Constraints statement}
-\label{sec:Constraints}
-As this work was to  be done in group, we have to develop a framework so everyone could work and share their code independently.
-\begin{itemize}
-    \item Heterogeneous environments: several operating systems (linux, windows, macOS), various platforms (local laptop training, Kaggle Kernels notebook, remote machines at Ecole Polytechnique). On every platform, data has to be acessible and experiments results have to be stored in a way they can be retrieved. We used the Kaggle dataset feature to  host the raw dataset as well as the preprocessed data.
-    \item Privacy: as not sharing code was among the rules of the challenge, our source code remained private on GitHub (\textit{which made cloning operations even trickier when using Kaggle kernels}).
-    \item Reproducibility: all our experiments are reproducible (source code tracking under git, local and cloud storage of experiments results using ~\href{https://wandb.ai/molecule-nlp-altegrad-23/molecule-nlp}{Weights and biases}).
-    \item Cost: project total budget limit to 50euros. \textit{Google Collab would not have met this requirements considering the amount of experiments we did and the long training times}.
-\end{itemize}
-
-
-We wrote a framework which takes and solves all these constraints at once and allows to focus on training models.
-
-\subsection*{Definition of an experiment}
-An experiment is defined by a unique identifier and the instantiation of a model (tokenization method, architecture of the LLM and GNN), the configuration of an  optimizer and training hyper parameters. At inference time, we're using this unique identifier so we can safely instantiate a network and reload the weights (\textit{trained model are by construction compatible with inference. This avoids the risk of having a `.pth` weight file without knowing which architecture to use to reload it.}).
-Launching the training of an experiment goes seamlessly with the following command line, below is the example for experiment 620:
-\begin{verbatim}
-    python train.py -e 620
-\end{verbatim}
-
-The same exact training can be ran directly on Kaggle using their API.
-\begin{verbatim}
-    python remote_training.py -e 620 -p -nb mol-nlp
-\end{verbatim}
-Finally, the evaluation mechanism generates the submission csv file and the right Kaggle API command line which can be used to submit to the hosted challenge (with a message which allows to know exactly which experiment was submitted in which conditions).
-
-\begin{verbatim}
-python evaluation.py -e 620
-\end{verbatim}
-
+\section{Appendix: Experiments}
+\label{sec:experiments}
+\subsection{Results with LoRa}
+\label{sec:lora}
 \begin{figure}
+\includegraphics[width=0.3\textwidth]{figures/502_514.png}
+\caption{LRAP scores for experiments 502 and 514}
+\label{502_fig}
+\end{figure}
+\begin{table*}[!]
     \centering
-    \includegraphics[width=0.5\textwidth]{figures/training_framework.png}
-    \caption{Remote training framework allows accessing free GPU resources on Kaggle Kernels. Local code is synchronized through our \textbf{private Github repository} (until the 4th of February) so the remote notebook can be run with the same code. The \textbf{Kaggle dataset} feature is used to store the raw dataset and the preprocessed data (for each tokenizer, we have stored the preprocessed dataset which saves nearly 10 minutes of computation time at the begining of each experiment). To fine tune our own models, we use \href{https://huggingface.co/balthou}{Hugging Face} as an exchange platform so we could easily start from a checkpoint from any remove computer. The \textbf{Weights and biases} platform is used to track the experiments results and monitor the training. Once finished, trained models can be retrieved by pulling the results.
-    Note that the small piece of code to help access Kaggle notebooks freely from the terminal was made available \href{https://github.com/balthazarneveu/mva\_pepites}{publicly} (totally independantly from this challenge) to be later used on other projects.
-    }
-    \label{fig:training_framework_schema}
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    \textbf{Experiment ID} &\textbf{Batch size}& \textbf{Model size} & \textbf{LLM} & \textbf{GNN} & \textbf{LRAP} \\ \hline
+    502         &  64    &1.9M & LoRA SciBERT  & Base GCN  & 61.6\%      \\ \hline
+     514         &  128    &888k & LoRA BERT  & Base GCN  & 71.8\%      \\ \hline
+    \end{tabular}
+    \caption{Baseline experiments with LoRA BERT and SciBERT}
+    \label{tab:lora}
+\end{table*}
+We here compare the results of experiments 502 and 514. Their validation scores are displayed on Figure \ref{502_fig}. They were conducted with the same learning rate (3e-4) without a learning rate scheduler. Their specific parameters are detailed in Table \ref{tab:lora}. Memory restrictions keep us from increasing the batch size to 128 in experiment 502.
+
+\subsection{Results for the experiments with different GCN architectures }
+\label{sec:gcn}
+We compared the influence of the depth of the GCN architecture on several very close models: 502 (base GCN), 571 (big GCN),573 (fat GCN). All elements except for the GCN and the learning scheduler are identical between these experiments. 502 has no learning scheduler which explains the oscillations. We have reason to believe that the Base GCN would have still underperformed compared to 571 and 573 even with the same scheduler. The architecture and parameters of the models are detailed in Table \ref{tab:GCN} and their LRAP scores are displayed on Figure \ref{gcn_fig}
+\begin{table*}[!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    \textbf{Experiment ID} &\textbf{Batch size}& \textbf{Model size} & \textbf{LLM} & \textbf{GNN} & \textbf{LRAP} \\ \hline
+    502         &  64    &1.9M & LoRA SciBERT  & Base GCN 3 layers & 61.6\%      \\ \hline
+     571         &  64    &2.9M & LoRA SciBERT  & Big GCN 5 layers  & 71.6\%      \\ \hline
+     573        &  64    &3.4M & LoRA SciBERT  & Fat GCN 7 layers  & 79.6\%      \\ \hline
+    \end{tabular}
+    \caption{Experiments with LoRa SciBERT and various GCN models}
+    \label{tab:GCN}
+\end{table*}
+\begin{figure}
+\includegraphics[width=0.3\textwidth]{figures/gcn.png}
+\caption{LRAP scores for experiments 502, 571 and 573}
+\label{gcn_fig}
 \end{figure}
 
-\subsection*{Training conditions}
-\label{sec:training conditions}
+\subsection{Results for the best models trained with the contrastive loss}
+\label{sec:best_old}
 
-\begin{table*}[ht]
+Out of all the experiments we led in the first part of our study with the initial contrastive loss provided with the baseline for this project, these 4 experiments are the ones that yielded the best LRAP scores. They were trained only using DistilBert in order to increase the batch size as much as possible and without LoRa which we did not feel helped us increase the batch size enough (complete architecture and parameters in Table \ref{tab:best_exp_old_loss}). All these experiments were performed using the same learning rate scheduler in "plateau" mode: initial learning rate of $3e-5$, "patience" of 8 epochs and decreasing factor of 0.8. We can see here that increasing the batch size can make up for a smaller GCN architecture and vice-versa and we obtained very similar results with all these experiments. Their scores are visible in Figure \ref{fig:old_best}.
+
+\begin{table*}[!]
     \centering
-    \begin{tabular}{lcccc}
+    \begin{tabular}{|c|c|c|c|c|}
     \hline
-    \textbf{Feature} & \textbf{Nvidia T500} & \textbf{Nvidia RTX 2060} & \textbf{Nvidia K100} & \textbf{Nvidia A4000} \\ \hline
-    OS & Linux & Linux WSL & Linux in Docker & Linux \\  
-    Location            & local laptop           & local laptop  & Kaggle  & Ecole Polytechnique  \\
-    Access & direct & direct & Kaggle Kernels & SSH \\
-    Dataset access & local SSD & local SSD & Kaggle dataset & remote download + SSD drives\\ 
-    Memory           & 4 GB                        & 6 GB                           & 16 GB                          & 24 GB                          \\
-    Student cost & - & Electricity $\approx$ +20 euros/month & Free & Free \\
-    Availability & $\infty$ & $\infty$ & 30 hours/week 12hours/experiment & $\approx \infty$ weekends and night \\
-    \hline
+    \textbf{Experiment ID} & \textbf{Model size} & \textbf{Batch size} & \textbf{GNN} & \textbf{LRAP} \\ \hline
+    9008         & 67.9M & 164      & Bigger GCN 5 layers & 85.6\%      \\ \hline
+     9009         &68.4M &  128      & Fat GCN 7 layers   & 85.9\%  \\ \hline
+     9010         & 68.4M & 144      & Fat GCN 7 layers   & 86.1\%     \\ \hline
+     9011        & 67.9M & 180      & Big GCN 5 layers  & 86.1\% \\ \hline
+
     \end{tabular}
-    \caption{Comparison of the training platform and GPUs which were used during training}
-    \label{table:gpu_comparison}
+    \caption{Successful experiments trained with the contrastive loss}
+    \label{tab:best_exp_old_loss}
 \end{table*}
 
+\begin{figure}
+\centering
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/9010_score.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/W&B Chart 04_02_2024 10_34_42.png}   
+\end{minipage}
+\caption{Score for various successful experiments trained with the contrastive loss}
+\label{fig:old_best}
+\end{figure}
 
-To setup the training loop, we started on a single NVIDIA GeForce RTX T500 local GPU with 4Gb of RAM (\textit{the baseline provided by the challenge organizers did not even run because of memory limitation}). This was enough to make sure we could train, track and monitor progress of all our experiments and build a whole local training framework. We started by freezing the LLM weights to reduce the amount of memory required and get decent batch sizes even on the tiny T500 GPU. Due to low performances, the need to access bigger computation resources quickly came so we had to overcome this difficulty by making our framework agnostic to the training platform and still be able to recover our results and monitor from anywhere. The diversity of training and hardware platforms is shown in \ref*{table:gpu_comparison}. We considered using Google Colab Pro (datasets and models shared through Google drive) but with the consideration that we have long training times, the cost would have been prohibitive. We found a good compromise and did many experiments using Kaggle Kernels through the API which are free and provide GPU access with 16Gb of RAM during a maximum time of 12 hours per session and up to 30hours per week.
+\subsection{Results for experiments trained with the binary contrastive loss}
+
+\subsubsection{Baseline experiments}
+\label{sec:baseline_new}
+
+We trained the baseline experiments (BERT encoder and basic 3 layer GCN) with this new binary contrastive loss.Their detailed parameters can be found in Table \ref{tab:base_new_loss}. We used the learning rate 1e-4 proposed in \cite{text2mol}. We observe that the results (displayed on Figure \ref{baseline_fig}) are much higher than the previous best result on the baseline (experiment 68, LRAP score of 66\%).
+\begin{table*}[!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    \textbf{Experiment ID} & \textbf{Model size} & \textbf{Batch size} &\textbf{Loss} & \textbf{LRAP} \\ \hline
+    18         & 67.0M & 32      & Binary contrastive  & 71.5\%      \\ \hline
+     19       & 67.0M  &  64      & Binary contrastive  & 79.9\%  \\ \hline
+     20        & 67.0M &  128      & Binary contrastive  & 77\%     \\ \hline
+     68     &67.0M   &  128     & Contrastive  & 66.7\% \\ \hline
+
+    \end{tabular}
+    \caption{Baseline experiments with different training losses}
+    \label{tab:base_new_loss}
+\end{table*}
+
+\begin{figure}
+\includegraphics[width=0.3\textwidth]{figures/baseline.png}
+\caption{LRAP score for baseline experiments}
+\label{baseline_fig}
+\end{figure}
+
+\subsubsection{Other successful experiments}
+\label{sec:best_new}
+In order to get other models with high scores, we reproduced models with an architecture similar to those of experiments 9008-9011 and trained them with the binary contrastive loss. These architectures are presented in further detail in Table \ref{tab:best_new_loss}.Thanks to this loss, we were able to achieve similar results with smaller batches during training. We retained the learning scheduler (initial $lr=1e-4$) and DistilBERT encoder and played with the graph and the batch sizes to obtain high performances. The scores of all these experiments are displayed on Figure \ref{fig:best_new_loss}. 
+
+\begin{table*}[!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    \textbf{Experiment ID} & \textbf{Model size} & \textbf{Batch size} &\textbf{GNN} & \textbf{LRAP} \\ \hline
+    9070         & 67.9M & 128      & Bigger GCN 5 layers  & 83.6\%      \\ \hline
+     9072      & 67.0M  &  128      & Base GCN 3 layers  & 79.9\%  \\ \hline
+     9073        & 67.9M &  64      & Bigger GCN 5 layers  & 83.0\%     \\ \hline
+     9075     &68.4M   &  64     & Fat GCN 7 layers  & 86.1\% \\ \hline
+      9077     & 68.4M  &  92     & Fat GCN 7 layers  & 86.3\% \\ \hline
+    \end{tabular}
+    \caption{Experiments with binary contrastive training loss}
+    \label{tab:best_new_loss}
+\end{table*}
+
+\begin{figure}
+\centering
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/9070_lr.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/9070_score.png}   
+\end{minipage}
+\caption{Score and learning rate for the best experiments with various GCN and batch sizes trained with the binary contrastive loss}
+\label{fig:best_new_loss}
+\end{figure}
+
+\subsection*{Freezing the LLM, training a large GCN from scratch}
+\label{sec:frozen}
+We reused the trained model 573 which we already presented (Lora Scibert model trained with a batch size of 64, a learning rate scheduler and the 'Fat GCN' architecture) in experiment 611. We froze the trained LLM obtained via 573 and trained 611 with a bigger batch size. The details about these experiments can be found in Table \ref{tab:frozen_573} and their respective scores are displayed on Figure \ref{fig:611}. This technique enabled us to improve the LRAP score of 80\%  we had already obtained when training experiment 573. 
+\begin{table*}[!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    \textbf{Experiment ID} & \textbf{Model size} & \textbf{Batch size} &\textbf{GNN} & \textbf{LRAP} \\ \hline
+    573         & 3.4M & 64    & Fat GCN 7 layers  & 79.6\%      \\ \hline
+     611 & 2.4 & 192 & Fat GCN 7 layers & 86.7%\ \\ \hline
+    \end{tabular}
+    \caption{Fully trained experiment and experiment with the frozen LLM and GCN trained from scratch}
+    \label{tab:frozen_573}
+\end{table*}
+
+\begin{figure}
+\centering
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/611_lr.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/611_score.png}   
+\end{minipage}
+\caption{Score and learning rate for fully trained experiment 573 and experiment 611 with frozen LLM}
+\label{fig:611}
+\end{figure}
+
+% \end{table*}

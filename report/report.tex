@@ -39,7 +39,7 @@
   \city{Palaiseau}
   \country{France}
 }
-\email{terverbasile@mail.com}
+\email{terverbasile@gmail.com}
 
 
 %% MAIN DOCUMENT
@@ -53,14 +53,14 @@
   \begin{teaserfigure}
     \includegraphics[width=0.9\textwidth]{figures/mol_text_overview.PNG}
     \centering
-    \caption{Our system matches a text description with the most relevant molecules. On the left side, text descriptions $T_{i}$ are tokenized and transformed into a numerical representations (embeddings) $t_{i}$ using a large language model. In the center, molecules $M_{i}$ represented using graph structures are processed by a graph neural network to create embeddings $m_{i}$. On the right side, pairwise similarity matrix between text and molecule allows finding the best matches (ranking) and is also the central mathematical object used to train the system (contrastive learning).
+    \caption{Our system matches a text description with the most relevant molecules. On the left side, text descriptions $T_{i}$ are tokenized and transformed into a numerical representations (embeddings) $t_{i}$ using a large language model. In the center, molecules $M_{j}$ are represented using graphs where each node is a molecular structure (not just an atom) attached with its vector representation. Graphs are processed by a graph neural network to create embeddings $m_{j}$. On the right side, pairwise similarity matrix between text and molecule allows finding the best matches (ranking) and is also the central mathematical object used to train the system (contrastive learning means maximizing $\vec{t_{i}}.\vec{m_{i}}$ and minimizing $\vec{t_{i}}.\vec{m_{j}}$  $\forall j \neq i$).
     }
     \label{fig:original_pipeline}
 \end{teaserfigure}
 % \end{figure*}
 
   %% TITLE
-  \maketitle
+\maketitle
 
 
   %% ABSTRACT
@@ -73,14 +73,17 @@
   \input{content/5_conclusion.tex}
 
   \newpage
-
-  %% APPENDIX
-  \appendix
-  \input{content/appendix.tex}
-  
-  \newpage
   %% BIBLIOGRAPHY
   \bibliographystyle{ACM-Reference-Format}
   \bibliography{references}
+  \newpage
+  %% APPENDIX
+  \appendix
+  \input{content/appendix.tex}
+  \input{content/appendix_framework.tex}
+  \input{content/appendix_extra.tex}
+  
+  \newpage
+
 
 \end{document}
