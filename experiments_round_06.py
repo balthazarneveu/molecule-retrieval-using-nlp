@@ -190,18 +190,19 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[NAME] += " Pretrained on 573"
         configuration["use_amp"] = True
 
-    elif exp == 615:
+    elif exp == 615 or exp == 616:
         # 573 LLM
         lr = 1e-3
         batch_size = 256
-        n = 200
+        n = 200 if exp == 615 else 100
+        temperature = False
         model, configuration = generic_experiment(
             configuration,
             llm=SCIBERT, graph=FAT_GCN,
             n=n,
             b=batch_size, lr=lr, wd=1e-1,
             lora=True, quantization=None,
-            temperature=False,
+            temperature=temperature,
         )
         REPO_ID = "balthou/molnlp_0573_LoraSciBERT_FatGCN"
         FILENAME = "model_0145.pt"
@@ -214,6 +215,8 @@ def get_round_6_experience(exp: int, configuration: dict, root_dir: Path = None,
         configuration[LOSS] = LOSS_BINARY_CROSSENTROPY
         configuration[SCHEDULER] = "ReduceLROnPlateau"
         configuration[SCHEDULER_CONFIGURATION] = dict(patience=5, factor=0.5)
+        if exp == 616:
+            configuration["use_amp"] = True
         configuration[NAME] += " Pretrained on 573"
 
     print(configuration)
