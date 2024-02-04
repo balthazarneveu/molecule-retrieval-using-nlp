@@ -140,13 +140,13 @@ class UltraFatGraphEncoder(GenericModel):
         x2 = self.conv2(x1, edge_index)
         x2 = x2.relu()
         x3 = self.conv3(x2, edge_index)
-        
+
         x3 = x3 + x1  # residual connection
         x3 = x3.relu()
         x4 = self.conv4(x3, edge_index)
         x4 = x4.relu()
         x5 = self.conv5(x4, edge_index)
-        
+
         x5 = x5 + x3  # residual connection
         x6 = self.conv6(x5, edge_index)
         x6 = x6.relu()
