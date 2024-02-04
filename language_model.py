@@ -1,10 +1,9 @@
 
-from transformers import AutoModel, AutoModelForCausalLM
+from transformers import AutoModel
 from generic import GenericModel
 import torch
 from typing import Optional
 from peft import LoraConfig, get_peft_model
-from transformers import BitsAndBytesConfig
 
 
 class TextEncoder(GenericModel):
@@ -32,6 +31,7 @@ class TextEncoder(GenericModel):
     def forward(self, input_ids, attention_mask):
         encoded_text = self.bert(input_ids, attention_mask=attention_mask)
         out = encoded_text.last_hidden_state[:, 0, :]
+        # We extract the output corresponding to the [CLS] token (the first one).
         if self.adapter is not None:
             out = self.adapter(out)
         return out
